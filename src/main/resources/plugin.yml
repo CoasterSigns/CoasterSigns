@@ -1,0 +1,8 @@
+name: CoasterSigns
+version: '${project.version}'
+main: dev.masp005.coastersigns.CoasterSigns
+api-version: 1.20
+prefix: CS
+authors: [ placeholder ]
+description: placeholder
+website: placeholder
