@@ -51,7 +51,7 @@ public class SignActionTimedScript extends CSBaseSignAction {
 
     @Override
     public String description() {
-        return "§bTimedScipts Executor\n§3Executes the given Script provided by TimedScripts" + (ready ? "" : "\n\n§cRequires TimedScripts to be installed.");
+        return "§bTimedScipts Executor\n§6§lSecond line: timedscript\n§r§3Executes the given Script provided by TimedScripts" + (ready ? "" : "\n\n§cRequires TimedScripts to be installed.");
     }
 
     @Override

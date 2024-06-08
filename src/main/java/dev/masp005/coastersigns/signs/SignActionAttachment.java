@@ -206,7 +206,7 @@ public class SignActionAttachment extends CSBaseSignAction {
 
     @Override
     public String description() {
-        return "§bAttachment Modifier\n§3Modifies the train or cart's attachments.";
+        return "§bAttachment Modifier\n§6§lSecond line: attachment\n§r§3Modifies the train or cart's attachments.";
     }
 
     @Override
