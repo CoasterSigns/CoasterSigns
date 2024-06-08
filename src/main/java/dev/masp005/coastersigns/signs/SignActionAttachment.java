@@ -6,7 +6,6 @@ import com.bergerkiller.bukkit.tc.controller.MinecartMember;
 import com.bergerkiller.bukkit.tc.events.SignActionEvent;
 import com.bergerkiller.bukkit.tc.events.SignChangeActionEvent;
 import com.bergerkiller.bukkit.tc.rails.RailLookup;
-import com.bergerkiller.bukkit.tc.signactions.SignAction;
 import com.bergerkiller.bukkit.tc.signactions.SignActionType;
 import dev.masp005.coastersigns.CoasterSigns;
 import dev.masp005.coastersigns.Util;
@@ -21,7 +20,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class SignActionAttachment extends SignAction {
+public class SignActionAttachment extends CSBaseSignAction {
+    static String name = "AttachmentSwitcher";
+
     public final boolean ready = true;
     private final CoasterSigns pl;
 
@@ -196,5 +197,20 @@ public class SignActionAttachment extends SignAction {
                 throw new IllegalStateException("this train does not have an item on the primary attachment.");
             }
         }
+    }
+
+    @Override
+    public String name() {
+        return "AttachmentModifier";
+    }
+
+    @Override
+    public String description() {
+        return "§bAttachment Modifier\n§3Modifies the train or cart's attachments.";
+    }
+
+    @Override
+    public boolean isReady() {
+        return ready;
     }
 }

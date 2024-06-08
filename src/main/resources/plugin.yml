@@ -2,9 +2,18 @@ name: CoasterSigns
 version: '${project.version}'
 main: dev.masp005.coastersigns.CoasterSigns
 api-version: 1.20
-prefix: CS
+prefix: CoasterSigns
 authors: [ placeholder ]
 description: placeholder
 website: placeholder
-depend: [TrainCarts]
-softdepend: [TimedScripts]
+depend: [ Train_Carts ]
+softdepend: [ TimedScripts ]
+permissions:
+  coastersigns.core:
+    description: Use CoasterSigns
+    default: op
+commands:
+  coastersigns:
+    aliases: cs
+    permission: coastersigns.core
+    usage: §c/cs signs

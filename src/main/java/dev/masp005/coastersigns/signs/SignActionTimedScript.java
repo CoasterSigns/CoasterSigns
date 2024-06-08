@@ -8,7 +8,9 @@ import de.themoep.timedscripts.TimedScripts;
 import dev.masp005.coastersigns.CoasterSigns;
 import org.bukkit.Bukkit;
 
-public class SignActionTimedScript extends SignAction {
+public class SignActionTimedScript extends CSBaseSignAction {
+    static String name = "TimedScriptExecutor";
+
     public final boolean ready;
     private final TimedScripts timedScriptsPlugin;
     private final CoasterSigns pl;
@@ -39,6 +41,21 @@ public class SignActionTimedScript extends SignAction {
 
     @Override
     public boolean build(SignChangeActionEvent signChangeActionEvent) {
+        return ready;
+    }
+
+    @Override
+    public String name() {
+        return "TimedScriptsExecutor";
+    }
+
+    @Override
+    public String description() {
+        return "§bTimedScipts Executor\n§3Executes the given Script provided by TimedScripts" + (ready ? "" : "\n\n§cRequires TimedScripts to be installed.");
+    }
+
+    @Override
+    public boolean isReady() {
         return ready;
     }
 }

@@ -1,6 +1,7 @@
 package dev.masp005.coastersigns;
 
 import com.bergerkiller.bukkit.tc.signactions.SignAction;
+import dev.masp005.coastersigns.signs.CSBaseSignAction;
 import dev.masp005.coastersigns.signs.SignActionAttachment;
 import dev.masp005.coastersigns.signs.SignActionTimedScript;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -9,18 +10,21 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class CoasterSigns extends JavaPlugin {
+    private final Map<String, Boolean> featureWatchCache = new HashMap<>();
+    public List<CSBaseSignAction> signs;
     private FileConfiguration config;
     private int verbosity;
     private Logger logger;
     private List<String> featureWatch;
-    private Map<String, Boolean> featureWatchCache = new HashMap<>();
 
+    //<editor-fold desc="Logging Methods" defaultstate="collapsed">
     private boolean checkFeatureWatch(String feature) {
         if (featureWatchCache.containsKey(feature)) return featureWatchCache.get(feature);
         boolean result = false;
@@ -55,14 +59,17 @@ public final class CoasterSigns extends JavaPlugin {
         if (verbosity >= 4 || checkFeatureWatch(feature))
             logger.info(feature + ": " + message);
     }
+    //</editor-fold>
 
     @Override
     public void onEnable() {
-        if (!getDataFolder().exists() && getDataFolder().mkdir())
-            logger.info("Created Config File Folder.");
+        logger = getLogger();
 
+        if (!getDataFolder().exists() && getDataFolder().mkdir())
+            logInfo("Created Config File Folder.", "startup");
         saveDefaultConfig();
         config = getConfig();
+
         String verbosityStr = config.getString("verbosity");
         if (verbosityStr == null) verbosity = 4;
         else {
@@ -72,10 +79,13 @@ public final class CoasterSigns extends JavaPlugin {
                             verbosityStr.equals("all") ? 4 : 3;
         }
         featureWatch = config.getStringList("watchFeatures");
-        logger = getLogger();
 
-        SignAction.register(new SignActionAttachment(this));
-        SignAction.register(new SignActionTimedScript(this));
+        signs = new LinkedList<>();
+        signs.add(new SignActionAttachment(this));
+        signs.add(new SignActionTimedScript(this));
+        for (CSBaseSignAction sign : signs) SignAction.register(sign);
+
+        new CSCommand(this);
     }
 
     @Override
