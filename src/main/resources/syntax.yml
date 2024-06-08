@@ -1,0 +1,17 @@
+modifications:
+  - range: * # every cart, default behaviour
+             # this argument is ignored when executing the config on a single cart
+    custommodeldata: int
+    item: id, without namespace
+    # target root attachment: omit child
+    # target first child attachment:
+    child: 0
+    # target fourth child's first child's second child:
+    child: 3:0:1
+  - range: 0 # head cart
+    #...
+  - range: 2..5 # carts 3 to 6 (inclusive)
+    #...
+  - range: 3.. # carts 4 and onwards
+    #...
+  - range: ..2 # every cart up to the third (inclusive)

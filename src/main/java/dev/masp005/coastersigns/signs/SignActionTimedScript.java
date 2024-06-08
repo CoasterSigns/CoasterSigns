@@ -1,0 +1,42 @@
+package dev.masp005.coastersigns.signs;
+
+import com.bergerkiller.bukkit.tc.events.SignActionEvent;
+import com.bergerkiller.bukkit.tc.events.SignChangeActionEvent;
+import com.bergerkiller.bukkit.tc.signactions.SignAction;
+import com.bergerkiller.bukkit.tc.signactions.SignActionType;
+import de.themoep.timedscripts.TimedScripts;
+import dev.masp005.coastersigns.CoasterSigns;
+import org.bukkit.Bukkit;
+
+public class SignActionTimedScript extends SignAction {
+    public final boolean ready;
+    private final TimedScripts timedScriptsPlugin;
+    private final CoasterSigns pl;
+
+    public SignActionTimedScript(CoasterSigns plugin) {
+        if (Bukkit.getPluginManager().getPlugin("timedscripts") == null) {
+            ready = false;
+            timedScriptsPlugin = null;
+        } else {
+            ready = true;
+            timedScriptsPlugin = ((TimedScripts) Bukkit.getPluginManager().getPlugin("timedscripts"));
+        }
+        pl = plugin;
+    }
+
+    @Override
+    public boolean match(SignActionEvent info) {
+        return info.isType("timedscript") && ready;
+    }
+
+    @Override
+    public void execute(SignActionEvent info) {
+        if (!info.isPowered() || !info.isAction(SignActionType.GROUP_ENTER)) return;
+        timedScriptsPlugin.getScriptManager().runScript(Bukkit.getConsoleSender(), info.getLine(2));
+    }
+
+    @Override
+    public boolean build(SignChangeActionEvent signChangeActionEvent) {
+        return ready;
+    }
+}

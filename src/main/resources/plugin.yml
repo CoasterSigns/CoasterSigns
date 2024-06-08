@@ -6,3 +6,5 @@ prefix: CS
 authors: [ placeholder ]
 description: placeholder
 website: placeholder
+depend: [TrainCarts]
+softdepend: [TimedScripts]
