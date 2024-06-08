@@ -14,14 +14,16 @@ public class SignActionTimedScript extends SignAction {
     private final CoasterSigns pl;
 
     public SignActionTimedScript(CoasterSigns plugin) {
+        pl = plugin;
         if (Bukkit.getPluginManager().getPlugin("timedscripts") == null) {
             ready = false;
             timedScriptsPlugin = null;
+            pl.logInfo("TrainCarts TimedScripts Executor could not be registered.", "setup");
         } else {
             ready = true;
             timedScriptsPlugin = ((TimedScripts) Bukkit.getPluginManager().getPlugin("timedscripts"));
+            pl.logInfo("TrainCarts TimedScripts Executor has been registered.", "setup");
         }
-        pl = plugin;
     }
 
     @Override

@@ -27,6 +27,7 @@ public class SignActionAttachment extends SignAction {
 
     public SignActionAttachment(CoasterSigns plugin) {
         pl = plugin;
+        pl.logInfo("TrainCarts Attachment Switcher Sign has been registered.", "setup");
     }
 
     @Override

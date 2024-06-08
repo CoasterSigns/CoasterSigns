@@ -1,0 +1,13 @@
+# Logging Verbosity:
+# fatal: Only fatal errors
+# error: Errors of all kinds
+# warning: Errors and Warnings (recommended)
+# all: (For Debugging purposes) Everything.
+verbosity: warning
+
+# List of features whose output will always be logged
+# Internal names can be found in the documentation
+# Global Features are: setup, shutdown (which are recommended)
+watchFeatures:
+  - setup
+  - shutdown
