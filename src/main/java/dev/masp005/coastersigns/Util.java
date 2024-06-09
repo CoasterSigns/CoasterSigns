@@ -56,6 +56,14 @@ public class Util {
         }
     }
 
+    /**
+     * Evaluates a String input into a minimum and maximum range
+     * based on the format n..m where both n and m can be omitted to reference the respective extremes.
+     *
+     * @param range Sanitized input to be evaluated
+     * @param max   The maximum possible index
+     * @return a length 2 array of integers representing minumum and maximum
+     */
     public static int[] evaluateRange(String range, int max) {
         int rangeMin;
         int rangeMax;

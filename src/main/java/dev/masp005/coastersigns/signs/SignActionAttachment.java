@@ -8,12 +8,10 @@ import com.bergerkiller.bukkit.tc.events.SignChangeActionEvent;
 import com.bergerkiller.bukkit.tc.rails.RailLookup;
 import com.bergerkiller.bukkit.tc.signactions.SignAction;
 import com.bergerkiller.bukkit.tc.signactions.SignActionType;
-import com.bergerkiller.bukkit.tc.utils.SignBuildOptions;
 import dev.masp005.coastersigns.CoasterSigns;
 import dev.masp005.coastersigns.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -46,9 +44,9 @@ public class SignActionAttachment extends CSBaseSignAction {
     public void execute(SignActionEvent info) {
         if (!ready) return;
         if (!info.isPowered() || !info.getAction().isMovement()) return;
-        Bukkit.broadcastMessage(info.getAction().name());
-        if (isApplySign(info.getTrackedSign())) {
-            // TODO: Parse Movement Direction Parameters
+        ModSignType type = evaluateModificationSignType(info.getTrackedSign());
+        // TODO: Parse Movement Direction Parameters
+        if (type.isApply) {
             String configName = info.getLine(3);
             YamlConfiguration config = pl.readFile("attachments", configName);
             if (config == null) {
@@ -59,23 +57,44 @@ public class SignActionAttachment extends CSBaseSignAction {
                 if (!config.isSet("modifications"))
                     throw new IllegalArgumentException("AMC does not have modifications property");
                 if (info.isCartSign() && info.getAction() == SignActionType.MEMBER_ENTER) {
-                    applyAttachmentConfigSingle(config, info.getMember());
+                    applyAttachmentListConfigSingle(config, info.getMember());
                     pl.logInfo(String.format("AMC %s applied. %s", configName, Util.blockCoordinates(info.getBlock())), debugName + ".apply");
                 }
                 if (info.isTrainSign() && info.getAction() == SignActionType.GROUP_ENTER) {
-                    Bukkit.broadcastMessage(info.getCartEnterDirection().toString());
-                    Bukkit.broadcastMessage(info.getFacing().name());
-                    applyAttachmentConfigGroup(config, info.getGroup());
+                    pl.logInfo(String.format("Direction: %s Facing: %s", info.getCartEnterDirection().toString(), info.getFacing().name()), debugName + ".direction");
+                    applyAttachmentListConfigGroup(config, info.getGroup());
                     pl.logInfo(String.format("AMC %s applied. %s", configName, Util.blockCoordinates(info.getBlock())), debugName + ".apply");
                 }
             } catch (Error e) {
                 pl.logWarn(String.format("AMC %s could not be applied. %s %s", configName, Util.blockCoordinates(info.getBlock()), e.toString()), debugName + ".apply");
             }
-            // return;
+        } else {
+            if (info.isCartSign() && info.getAction() == SignActionType.MEMBER_ENTER || info.isTrainSign() && info.getAction() == SignActionType.GROUP_ENTER) {
+                YamlConfiguration modification = type.toSingleModConfig();
+                String modStr = info.getLine(3);
+                if (modStr.startsWith("i=")) modification.set("item", modStr.substring(2));
+                if (modStr.startsWith("t=")) modification.set("type", modStr.substring(2));
+                if (modStr.startsWith("m=")) modification.set("custommodeldata", Integer.parseInt(modStr.substring(2)));
+
+                pl.logInfo(String.format("Inline mod result %s:\n%s", Util.blockCoordinates(info.getBlock()), modification.saveToString()), debugName + ".inline.parse");
+
+                if (info.isCartSign() && info.getAction() == SignActionType.MEMBER_ENTER) {
+                    applyAttachmentModification(modification, info.getMember());
+                    pl.logInfo(String.format("Inline member modification applied. %s", Util.blockCoordinates(info.getBlock())), debugName + ".inline");
+                }
+                if (info.isTrainSign() && info.getAction() == SignActionType.GROUP_ENTER) {
+                    pl.logInfo(String.format("Direction: %s Facing: %s", info.getCartEnterDirection().toString(), info.getFacing().name()), debugName + ".direction");
+                    applySingleAttachmentConfigGroup(modification, info.getGroup());
+                    pl.logInfo(String.format("Inline group modification applied. %s", Util.blockCoordinates(info.getBlock())), debugName + ".inline");
+                }
+            }
         }
     }
 
+    // TODO: Revamp after features are completed
     public boolean build(SignChangeActionEvent info) {
+        return true;
+        /*
         SignBuildOptions message = SignBuildOptions.create()
                 .setHelpURL(helpLink)
                 .setName((info.isCartSign() ? "cart" : "train") + " attachment");
@@ -98,28 +117,53 @@ public class SignActionAttachment extends CSBaseSignAction {
         message.setDescription(basicDesc + "\n\nError: Currently, the 3rd line needs to be \"apply\", 4th needs to point to a modification config file.").handle(info.getPlayer());
         message.handle(info.getPlayer());
         return false;
+        */
     }
 
-    //<editor-fold desc="AMC application methods" defaultstate="collapsed">
-
     /**
-     * Checks if a Sign is configured to apply some specified AMC.
+     * Evaluates the third line of a sign of this type.
      *
-     * @param sign The sign to check
-     * @return true if it is, false otherwise.
+     * @param sign The sign to evaluate
+     * @return A ModSignType object containing all info about this sign.
      */
-    private boolean isApplySign(RailLookup.TrackedSign sign) {
-        String line2 = sign.getLine(2);
-        if (!line2.startsWith("apply")) return false;
-        if (line2.equals("apply")) return true;
-        String extras = line2.substring("apply".length()).trim();
-        if ((extras.equals(">") || extras.equals("<")) && sign.isRealSign()) return true;
-        try {
-            BlockFace.valueOf(extras.toUpperCase());
-            return true;
-        } catch (IllegalArgumentException ex) {
-            return false;
+    private ModSignType evaluateModificationSignType(RailLookup.TrackedSign sign) {
+        ModSignType result = new ModSignType();
+        String[] line2 = sign.getLine(2).trim().split(" ");
+
+        String target = line2[0];
+        if (target.equals("apply")) {
+            result.isApply = true;
+            result.isInline = false;
+        } else {
+            result.isApply = false;
+            result.isInline = true;
+            if (!target.equals("inline")) {
+                int rStartIdx = target.indexOf('r');
+                int cStartIdx = target.indexOf('c');
+                if (rStartIdx != -1 || cStartIdx != -1) {
+                    if (rStartIdx == -1) {
+                        result.child = target.substring(cStartIdx + 1);
+                    } else if (cStartIdx == -1) {
+                        result.range = target.substring(rStartIdx + 1);
+                    } else {
+                        if (rStartIdx < cStartIdx) {
+                            result.range = target.substring(rStartIdx + 1, cStartIdx);
+                            result.child = target.substring(cStartIdx + 1);
+                        } else {
+                            result.child = target.substring(cStartIdx + 1, rStartIdx);
+                            result.range = target.substring(rStartIdx + 1);
+                        }
+                    }
+                }
+            }
         }
+
+        if (line2.length == 2) {
+            String direction = line2[1];
+            // TODO: parse direction
+            result.direction = direction.charAt(0);
+        } else result.direction = '*';
+        return result;
     }
 
     /**
@@ -128,20 +172,30 @@ public class SignActionAttachment extends CSBaseSignAction {
      * @param config The AMC to apply.
      * @param group  The group to apply it to.
      */
-    private void applyAttachmentConfigGroup(YamlConfiguration config, MinecartGroup group) {
+    private void applyAttachmentListConfigGroup(YamlConfiguration config, MinecartGroup group) {
         List<Map<?, ?>> mods = config.getMapList("modifications");
+        pl.logInfo("Mod count: " + mods.size(), debugName + ".apply.groupConf");
 
         if (mods.size() == 0) return;
         for (int i = 0; i < mods.size(); i++) {
             YamlConfiguration modConfig = Util.makeConfig(mods.get(i));
             pl.logInfo(String.format("Applying #%d: %s", i, modConfig.saveToString()), debugName + ".apply.groupConf");
-
-            int[] range = Util.evaluateRange(modConfig.get("cart"), group.size() - 1);
-            pl.logInfo(Arrays.toString(range), debugName + ".apply.groupConf");
-
-            for (int j = range[0]; j <= range[1]; j++)
-                applyAttachmentModification(modConfig, group.get(j));
+            applySingleAttachmentConfigGroup(modConfig, group);
         }
+    }
+
+    /**
+     * Applies a single entry of an AMC to a MinecartGroup (a TrainCarts Train)
+     *
+     * @param config The AMC to apply.
+     * @param group  The group to apply it to.
+     */
+    private void applySingleAttachmentConfigGroup(YamlConfiguration config, MinecartGroup group) {
+        int[] range = Util.evaluateRange(config.get("cart"), group.size() - 1);
+        pl.logInfo(Arrays.toString(range), debugName + ".apply.groupConf");
+
+        for (int j = range[0]; j <= range[1]; j++)
+            applyAttachmentModification(config, group.get(j));
     }
 
     /**
@@ -150,7 +204,7 @@ public class SignActionAttachment extends CSBaseSignAction {
      * @param config The AMC to apply.
      * @param member The cart to apply it to.
      */
-    private void applyAttachmentConfigSingle(YamlConfiguration config, MinecartMember<?> member) {
+    private void applyAttachmentListConfigSingle(YamlConfiguration config, MinecartMember<?> member) {
         List<Map<?, ?>> mods = config.getMapList("modifications");
 
         if (mods.size() == 0) return;
@@ -182,7 +236,6 @@ public class SignActionAttachment extends CSBaseSignAction {
             } else throw new IllegalArgumentException("child");
         }
         if (config.isSet("type")) {
-            Bukkit.broadcastMessage((String) target.getConfig().get("type"));
             String type = Objects.requireNonNull(config.getString("type")).toLowerCase();
             switch (type) {
                 case "none":
@@ -215,7 +268,6 @@ public class SignActionAttachment extends CSBaseSignAction {
             }
         }
     }
-    //</editor-fold>
 
     public String name() {
         return name;
@@ -231,5 +283,21 @@ public class SignActionAttachment extends CSBaseSignAction {
 
     public boolean isReady() {
         return ready;
+    }
+
+    private static class ModSignType {
+        public boolean isApply;
+        public boolean isInline;
+        public String range;
+        public String child;
+        public char direction;
+
+        public YamlConfiguration toSingleModConfig() {
+            if (isApply) throw new IllegalStateException("Cannot create Mod Config for apply signs.");
+            YamlConfiguration result = new YamlConfiguration();
+            result.set("cart", range);
+            result.set("child", child);
+            return result;
+        }
     }
 }

@@ -71,7 +71,7 @@ public class CSCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
         List<String> entries = new LinkedList<>();
-        if (args.length == 0) {
+        if (args.length == 0 || args.length == 1 && args[0].equals("")) {
             entries.add("signlist");
             entries.add("signs");
             return entries;
