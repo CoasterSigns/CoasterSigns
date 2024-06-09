@@ -2,6 +2,7 @@ package dev.masp005.coastersigns.signs;
 
 import com.bergerkiller.bukkit.tc.events.SignActionEvent;
 import com.bergerkiller.bukkit.tc.events.SignChangeActionEvent;
+import com.bergerkiller.bukkit.tc.signactions.SignAction;
 import com.bergerkiller.bukkit.tc.signactions.SignActionType;
 import de.themoep.timedscripts.TimedScripts;
 import dev.masp005.coastersigns.CoasterSigns;
@@ -28,6 +29,7 @@ public class SignActionTimedScript extends CSBaseSignAction {
         } else {
             ready = true;
             timedScriptsPlugin = ((TimedScripts) Bukkit.getPluginManager().getPlugin("timedscripts"));
+            SignAction.register(this);
             pl.logInfo("TrainCarts TimedScripts Executor has been registered.", "setup");
         }
     }

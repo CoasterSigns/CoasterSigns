@@ -6,6 +6,7 @@ import com.bergerkiller.bukkit.tc.controller.MinecartMember;
 import com.bergerkiller.bukkit.tc.events.SignActionEvent;
 import com.bergerkiller.bukkit.tc.events.SignChangeActionEvent;
 import com.bergerkiller.bukkit.tc.rails.RailLookup;
+import com.bergerkiller.bukkit.tc.signactions.SignAction;
 import com.bergerkiller.bukkit.tc.signactions.SignActionType;
 import com.bergerkiller.bukkit.tc.utils.SignBuildOptions;
 import dev.masp005.coastersigns.CoasterSigns;
@@ -17,6 +18,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -33,6 +35,7 @@ public class SignActionAttachment extends CSBaseSignAction {
 
     public SignActionAttachment(CoasterSigns plugin) {
         pl = plugin;
+        SignAction.register(this);
         pl.logInfo("TrainCarts Attachment Switcher Sign has been registered.", "setup");
     }
 
@@ -46,22 +49,27 @@ public class SignActionAttachment extends CSBaseSignAction {
         Bukkit.broadcastMessage(info.getAction().name());
         if (isApplySign(info.getTrackedSign())) {
             // TODO: Parse Movement Direction Parameters
-            YamlConfiguration config = pl.readFile(info.getLine(3));
+            String configName = info.getLine(3);
+            YamlConfiguration config = pl.readFile("attachments", configName);
             if (config == null) {
-                pl.logWarn("AMC " + info.getLine(3) + " does not exist. " + Util.blockCoordinates(info.getBlock()), debugName + ".apply");
+                pl.logWarn("AMC " + configName + " does not exist. " + Util.blockCoordinates(info.getBlock()), debugName + ".apply");
                 return;
             }
             try {
-                if (info.isCartSign() && info.getAction() == SignActionType.MEMBER_ENTER)
+                if (!config.isSet("modifications"))
+                    throw new IllegalArgumentException("AMC does not have modifications property");
+                if (info.isCartSign() && info.getAction() == SignActionType.MEMBER_ENTER) {
                     applyAttachmentConfigSingle(config, info.getMember());
+                    pl.logInfo(String.format("AMC %s applied. %s", configName, Util.blockCoordinates(info.getBlock())), debugName + ".apply");
+                }
                 if (info.isTrainSign() && info.getAction() == SignActionType.GROUP_ENTER) {
                     Bukkit.broadcastMessage(info.getCartEnterDirection().toString());
                     Bukkit.broadcastMessage(info.getFacing().name());
                     applyAttachmentConfigGroup(config, info.getGroup());
+                    pl.logInfo(String.format("AMC %s applied. %s", configName, Util.blockCoordinates(info.getBlock())), debugName + ".apply");
                 }
-                pl.logInfo("AMC " + info.getLine(3) + " applied. " + Util.blockCoordinates(info.getBlock()), debugName + ".apply");
             } catch (Error e) {
-                pl.logWarn("AMC " + info.getLine(3) + " could not be applied. " + Util.blockCoordinates(info.getBlock()) + " " + e.toString(), debugName + ".apply");
+                pl.logWarn(String.format("AMC %s could not be applied. %s %s", configName, Util.blockCoordinates(info.getBlock()), e.toString()), debugName + ".apply");
             }
             // return;
         }
@@ -71,12 +79,13 @@ public class SignActionAttachment extends CSBaseSignAction {
         SignBuildOptions message = SignBuildOptions.create()
                 .setHelpURL(helpLink)
                 .setName((info.isCartSign() ? "cart" : "train") + " attachment");
+        message.setDescription(basicDesc);
         if (info.getTrackedSign().getHeader().isRC()) {
             message.setDescription(basicDesc + "\n\nError: RC is not supported.").handle(info.getPlayer());
             return false;
         }
         if (isApplySign(info.getTrackedSign())) {
-            YamlConfiguration config = pl.readFile(info.getLine(3));
+            YamlConfiguration config = pl.readFile("attachments", info.getLine(3));
             if (config == null) {
                 if (info.getLine(3).endsWith(".yml"))
                     message.setDescription(basicDesc + "\n\nError: Config file not found. Do not include \".yml\"!");
@@ -123,42 +132,15 @@ public class SignActionAttachment extends CSBaseSignAction {
         List<Map<?, ?>> mods = config.getMapList("modifications");
 
         if (mods.size() == 0) return;
-        for (Map<?, ?> mod : mods) {
-            YamlConfiguration modConfig = Util.makeConfig(mod);
+        for (int i = 0; i < mods.size(); i++) {
+            YamlConfiguration modConfig = Util.makeConfig(mods.get(i));
+            pl.logInfo(String.format("Applying #%d: %s", i, modConfig.saveToString()), debugName + ".apply.groupConf");
 
-            String range;
-            int rangeMin;
-            int rangeMax;
-            Object rangeRaw = modConfig.get("cart");
+            int[] range = Util.evaluateRange(modConfig.get("cart"), group.size() - 1);
+            pl.logInfo(Arrays.toString(range), debugName + ".apply.groupConf");
 
-            if (rangeRaw instanceof Integer) range = String.valueOf(rangeRaw);
-            else if (rangeRaw instanceof String) range = (String) rangeRaw;
-            else if (rangeRaw == null) range = "..";
-            else throw new IllegalArgumentException("cart");
-            range = range.trim();
-
-            if (range.equals("..")) {
-                rangeMin = 0;
-                rangeMax = group.size() - 1;
-            } else if (range.startsWith("..")) {
-                rangeMin = 0;
-                rangeMax = Integer.parseInt(range.substring(2));
-            } else if (range.endsWith("..")) {
-                rangeMin = Integer.parseInt(range.substring(0, range.indexOf('.')));
-                rangeMax = group.size() - 1;
-            } else if (range.contains("..")) {
-                int delimiter = range.indexOf('.');
-                rangeMin = Integer.parseInt(range.substring(0, delimiter));
-                rangeMax = Integer.parseInt(range.substring(delimiter + 2));
-            } else {
-                rangeMin = rangeMax = Integer.parseInt(range);
-            }
-            rangeMin = Math.max(0, rangeMin);
-            rangeMax = Math.min(group.size() - 1, rangeMax);
-
-            for (int i = rangeMin; i <= rangeMax; i++) {
-                applyAttachmentConfigSingle(modConfig, group.get(i));
-            }
+            for (int j = range[0]; j <= range[1]; j++)
+                applyAttachmentModification(modConfig, group.get(j));
         }
     }
 
@@ -172,8 +154,10 @@ public class SignActionAttachment extends CSBaseSignAction {
         List<Map<?, ?>> mods = config.getMapList("modifications");
 
         if (mods.size() == 0) return;
-        for (Map<?, ?> mod : mods) {
-            applyAttachmentModification(Util.makeConfig(mod), member);
+        for (int i = 0; i < mods.size(); i++) {
+            YamlConfiguration modConfig = Util.makeConfig(mods.get(i));
+            pl.logInfo(String.format("Applying #%d: %s", i, modConfig.saveToString()), debugName + ".apply.singleConf");
+            applyAttachmentModification(modConfig, member);
         }
     }
 
@@ -185,6 +169,8 @@ public class SignActionAttachment extends CSBaseSignAction {
      */
     private void applyAttachmentModification(YamlConfiguration config, MinecartMember<?> member) {
         Attachment target = member.getAttachments().getRootAttachment();
+
+        pl.logInfo(config.saveToString(), debugName + ".apply.singleMod");
 
         if (config.isSet("child")) {
             Object childRaw = config.get("child");

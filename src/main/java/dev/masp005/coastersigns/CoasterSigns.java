@@ -1,6 +1,5 @@
 package dev.masp005.coastersigns;
 
-import com.bergerkiller.bukkit.tc.signactions.SignAction;
 import dev.masp005.coastersigns.signs.CSBaseSignAction;
 import dev.masp005.coastersigns.signs.SignActionAttachment;
 import dev.masp005.coastersigns.signs.SignActionTimedScript;
@@ -8,6 +7,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -83,7 +83,6 @@ public final class CoasterSigns extends JavaPlugin {
         signs = new LinkedList<>();
         signs.add(new SignActionAttachment(this));
         signs.add(new SignActionTimedScript(this));
-        for (CSBaseSignAction sign : signs) SignAction.register(sign);
 
         new CSCommand(this);
     }
@@ -92,11 +91,17 @@ public final class CoasterSigns extends JavaPlugin {
     public void onDisable() {
     }
 
-    public YamlConfiguration readFile(String name) {
-        File file = new File(getDataFolder(), name + ".yml");
+    /**
+     * Reads the YAML configuration at (dir)/(name).yml and returns it as a parsed YamlConfiguration
+     *
+     * @param dir  The name of the subdirectory from the plugin's config directory
+     * @param name The name of the file, excluding the file extension
+     * @return The parsed config as a YamlConfiguration, or null if it could not be found
+     */
+    @Nullable
+    public YamlConfiguration readFile(@Nullable String dir, String name) {
+        File file = new File(dir == null ? getDataFolder() : new File(getDataFolder(), dir), name + ".yml");
         if (!file.exists()) return null;
-        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-        if (!config.isSet("modifications")) return null;
-        return config;
+        return YamlConfiguration.loadConfiguration(file);
     }
 }
