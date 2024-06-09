@@ -23,6 +23,8 @@ import java.util.Objects;
 
 public class SignActionAttachment extends CSBaseSignAction {
     static String name = "AttachmentSwitcher";
+    static String debugName = "attchMod";
+    // subfeatures: apply, inline
     static String basicDesc = "Modifies the train or cart's attachments.";
     static String helpLink = "";
 
@@ -39,12 +41,16 @@ public class SignActionAttachment extends CSBaseSignAction {
     }
 
     public void execute(SignActionEvent info) {
+        if (!ready) return;
         if (!info.isPowered() || !info.getAction().isMovement()) return;
         Bukkit.broadcastMessage(info.getAction().name());
         if (isApplySign(info.getTrackedSign())) {
             // TODO: Parse Movement Direction Parameters
             YamlConfiguration config = pl.readFile(info.getLine(3));
-            if (config == null) return;
+            if (config == null) {
+                pl.logWarn("AMC " + info.getLine(3) + " does not exist. " + Util.blockCoordinates(info.getBlock()), debugName + ".apply");
+                return;
+            }
             try {
                 if (info.isCartSign() && info.getAction() == SignActionType.MEMBER_ENTER)
                     applyAttachmentConfigSingle(config, info.getMember());
@@ -53,9 +59,9 @@ public class SignActionAttachment extends CSBaseSignAction {
                     Bukkit.broadcastMessage(info.getFacing().name());
                     applyAttachmentConfigGroup(config, info.getGroup());
                 }
+                pl.logInfo("AMC " + info.getLine(3) + " applied. " + Util.blockCoordinates(info.getBlock()), debugName + ".apply");
             } catch (Error e) {
-                pl.getLogger().warning("Invalid modification config: " + info.getLine(3));
-                pl.getLogger().warning(e.toString());
+                pl.logWarn("AMC " + info.getLine(3) + " could not be applied. " + Util.blockCoordinates(info.getBlock()) + " " + e.toString(), debugName + ".apply");
             }
             // return;
         }

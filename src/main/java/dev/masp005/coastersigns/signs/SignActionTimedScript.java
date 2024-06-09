@@ -5,10 +5,13 @@ import com.bergerkiller.bukkit.tc.events.SignChangeActionEvent;
 import com.bergerkiller.bukkit.tc.signactions.SignActionType;
 import de.themoep.timedscripts.TimedScripts;
 import dev.masp005.coastersigns.CoasterSigns;
+import dev.masp005.coastersigns.Util;
 import org.bukkit.Bukkit;
 
 public class SignActionTimedScript extends CSBaseSignAction {
     static String name = "TimedScriptExecutor";
+    static String debugName = "tmdScr";
+    // subfeatures: execution
     static String basicDesc = "Executes the given Script provided by TimedScripts.";
     static String helpLink = "";
 
@@ -34,8 +37,12 @@ public class SignActionTimedScript extends CSBaseSignAction {
     }
 
     public void execute(SignActionEvent info) {
+        if (!ready) return;
         if (!info.isPowered() || !info.isAction(SignActionType.GROUP_ENTER)) return;
-        timedScriptsPlugin.getScriptManager().runScript(Bukkit.getConsoleSender(), info.getLine(2));
+        if (timedScriptsPlugin.getScriptManager().runScript(Bukkit.getConsoleSender(), info.getLine(2)))
+            pl.logInfo("Script " + info.getLine(2) + " executed." + Util.blockCoordinates(info.getBlock()), debugName + ".execution");
+        else
+            pl.logWarn("Script " + info.getLine(2) + " not found! " + Util.blockCoordinates(info.getBlock()), debugName + ".execution");
     }
 
     public boolean build(SignChangeActionEvent signChangeActionEvent) {
