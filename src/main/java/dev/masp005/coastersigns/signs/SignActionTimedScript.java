@@ -2,7 +2,6 @@ package dev.masp005.coastersigns.signs;
 
 import com.bergerkiller.bukkit.tc.events.SignActionEvent;
 import com.bergerkiller.bukkit.tc.events.SignChangeActionEvent;
-import com.bergerkiller.bukkit.tc.signactions.SignAction;
 import com.bergerkiller.bukkit.tc.signactions.SignActionType;
 import de.themoep.timedscripts.TimedScripts;
 import dev.masp005.coastersigns.CoasterSigns;
@@ -10,6 +9,8 @@ import org.bukkit.Bukkit;
 
 public class SignActionTimedScript extends CSBaseSignAction {
     static String name = "TimedScriptExecutor";
+    static String basicDesc = "Executes the given Script provided by TimedScripts.";
+    static String helpLink = "";
 
     public final boolean ready;
     private final TimedScripts timedScriptsPlugin;
@@ -28,33 +29,31 @@ public class SignActionTimedScript extends CSBaseSignAction {
         }
     }
 
-    @Override
     public boolean match(SignActionEvent info) {
         return info.isType("timedscript") && ready;
     }
 
-    @Override
     public void execute(SignActionEvent info) {
         if (!info.isPowered() || !info.isAction(SignActionType.GROUP_ENTER)) return;
         timedScriptsPlugin.getScriptManager().runScript(Bukkit.getConsoleSender(), info.getLine(2));
     }
 
-    @Override
     public boolean build(SignChangeActionEvent signChangeActionEvent) {
         return ready;
     }
 
-    @Override
     public String name() {
-        return "TimedScriptsExecutor";
+        return name;
     }
 
-    @Override
     public String description() {
-        return "§bTimedScipts Executor\n§6§lSecond line: timedscript\n§r§3Executes the given Script provided by TimedScripts" + (ready ? "" : "\n\n§cRequires TimedScripts to be installed.");
+        return "§bTimedScipts Executor\n§6§lSecond line: timedscript\n§r§3" + basicDesc + (ready ? "" : "\n\n§cRequires TimedScripts to be installed.");
     }
 
-    @Override
+    public String helpURL() {
+        return helpLink;
+    }
+
     public boolean isReady() {
         return ready;
     }

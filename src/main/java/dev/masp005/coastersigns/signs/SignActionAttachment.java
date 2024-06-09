@@ -7,6 +7,7 @@ import com.bergerkiller.bukkit.tc.events.SignActionEvent;
 import com.bergerkiller.bukkit.tc.events.SignChangeActionEvent;
 import com.bergerkiller.bukkit.tc.rails.RailLookup;
 import com.bergerkiller.bukkit.tc.signactions.SignActionType;
+import com.bergerkiller.bukkit.tc.utils.SignBuildOptions;
 import dev.masp005.coastersigns.CoasterSigns;
 import dev.masp005.coastersigns.Util;
 import org.bukkit.Bukkit;
@@ -22,6 +23,8 @@ import java.util.Objects;
 
 public class SignActionAttachment extends CSBaseSignAction {
     static String name = "AttachmentSwitcher";
+    static String basicDesc = "Modifies the train or cart's attachments.";
+    static String helpLink = "";
 
     public final boolean ready = true;
     private final CoasterSigns pl;
@@ -31,12 +34,10 @@ public class SignActionAttachment extends CSBaseSignAction {
         pl.logInfo("TrainCarts Attachment Switcher Sign has been registered.", "setup");
     }
 
-    @Override
     public boolean match(SignActionEvent info) {
         return info.isType("attachments");
     }
 
-    @Override
     public void execute(SignActionEvent info) {
         if (!info.isPowered() || !info.getAction().isMovement()) return;
         Bukkit.broadcastMessage(info.getAction().name());
@@ -60,31 +61,38 @@ public class SignActionAttachment extends CSBaseSignAction {
         }
     }
 
-    @Override
     public boolean build(SignChangeActionEvent info) {
+        SignBuildOptions message = SignBuildOptions.create()
+                .setHelpURL(helpLink)
+                .setName((info.isCartSign() ? "cart" : "train") + " attachment");
         if (info.getTrackedSign().getHeader().isRC()) {
-            info.getPlayer().sendMessage("rc is not supported (yet™)");
+            message.setDescription(basicDesc + "\n\nError: RC is not supported.").handle(info.getPlayer());
             return false;
         }
         if (isApplySign(info.getTrackedSign())) {
             YamlConfiguration config = pl.readFile(info.getLine(3));
             if (config == null) {
-                info.getPlayer().sendMessage("missing or invalid config");
                 if (info.getLine(3).endsWith(".yml"))
-                    info.getPlayer().sendMessage("no .yml just the filename");
+                    message.setDescription(basicDesc + "\n\nError: Config file not found. Do not include \".yml\"!");
+                else message.setDescription(basicDesc + "\n\nError: Config file not found.");
+                message.handle(info.getPlayer());
                 return false;
             }
             return true;
         }
-        info.getPlayer().sendMessage("3rd line needs to be \"apply\", 4th needs to point to a modification config");
-
-        /*SignBuildOptions.create()
-                .setName(info.isCartSign() ? "cart enableslowdown" : "train enableslowdown")
-                .setDescription("leaves the train free to handle by gravity and changes its maxspeed")
-                .handle(info.getPlayer());*/
+        message.setDescription(basicDesc + "\n\nError: Currently, the 3rd line needs to be \"apply\", 4th needs to point to a modification config file.").handle(info.getPlayer());
+        message.handle(info.getPlayer());
         return false;
     }
 
+    //<editor-fold desc="AMC application methods" defaultstate="collapsed">
+
+    /**
+     * Checks if a Sign is configured to apply some specified AMC.
+     *
+     * @param sign The sign to check
+     * @return true if it is, false otherwise.
+     */
     private boolean isApplySign(RailLookup.TrackedSign sign) {
         String line2 = sign.getLine(2);
         if (!line2.startsWith("apply")) return false;
@@ -99,8 +107,13 @@ public class SignActionAttachment extends CSBaseSignAction {
         }
     }
 
-
-    public void applyAttachmentConfigGroup(YamlConfiguration config, MinecartGroup group) {
+    /**
+     * Applies an Attachment Modification Config (AMC) to a MinecartGroup (a TrainCarts Train)
+     *
+     * @param config The AMC to apply.
+     * @param group  The group to apply it to.
+     */
+    private void applyAttachmentConfigGroup(YamlConfiguration config, MinecartGroup group) {
         List<Map<?, ?>> mods = config.getMapList("modifications");
 
         if (mods.size() == 0) return;
@@ -143,7 +156,13 @@ public class SignActionAttachment extends CSBaseSignAction {
         }
     }
 
-    public void applyAttachmentConfigSingle(YamlConfiguration config, MinecartMember<?> member) {
+    /**
+     * Applies an Attachment Modification Config (AMC) to a single TrainCarts-registered cart
+     *
+     * @param config The AMC to apply.
+     * @param member The cart to apply it to.
+     */
+    private void applyAttachmentConfigSingle(YamlConfiguration config, MinecartMember<?> member) {
         List<Map<?, ?>> mods = config.getMapList("modifications");
 
         if (mods.size() == 0) return;
@@ -152,7 +171,13 @@ public class SignActionAttachment extends CSBaseSignAction {
         }
     }
 
-    public void applyAttachmentModification(YamlConfiguration config, MinecartMember<?> member) {
+    /**
+     * Applies a singular modification from an AMC to a single TrainCarts-registered cart.
+     *
+     * @param config The AMC to apply.
+     * @param member The cart to apply it to.
+     */
+    private void applyAttachmentModification(YamlConfiguration config, MinecartMember<?> member) {
         Attachment target = member.getAttachments().getRootAttachment();
 
         if (config.isSet("child")) {
@@ -198,18 +223,20 @@ public class SignActionAttachment extends CSBaseSignAction {
             }
         }
     }
+    //</editor-fold>
 
-    @Override
     public String name() {
-        return "AttachmentModifier";
+        return name;
     }
 
-    @Override
     public String description() {
-        return "§bAttachment Modifier\n§6§lSecond line: attachment\n§r§3Modifies the train or cart's attachments.";
+        return "§bAttachment Modifier\n§6§lSecond line: attachment\n§r§3" + basicDesc;
     }
 
-    @Override
+    public String helpURL() {
+        return helpLink;
+    }
+
     public boolean isReady() {
         return ready;
     }

@@ -53,7 +53,8 @@ public class CSCommand implements CommandExecutor, TabCompleter {
                     if (first) first = false;
                     else component.append(", ").reset().color(ChatColor.WHITE);
                     component.append(sign.name()).color(sign.isReady() ? ChatColor.GREEN : ChatColor.RED)
-                            .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(sign.description())));
+                            .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(sign.description())))
+                            .event(new ClickEvent(ClickEvent.Action.OPEN_URL, sign.helpURL()));
                 }
 
                 component.append("\n\nYou can hover and click each feature for more info. Additionally, you can ").reset().color(ChatColor.AQUA)
