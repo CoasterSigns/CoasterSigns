@@ -27,7 +27,7 @@ public class SignActionAttachment extends CSBaseSignAction {
     static String name = "AttachmentSwitcher";
     static String debugName = "attchMod";
     // subfeatures: apply, inline, direction
-    static String basicDesc = "Modifies the train or cart's attachments.";
+    static String basicDesc = "modify the train or cart's attachments";
     static String helpLink = "";
 
     public final boolean ready = true;
@@ -97,10 +97,10 @@ public class SignActionAttachment extends CSBaseSignAction {
     public boolean build(SignChangeActionEvent info) {
         SignBuildOptions message = SignBuildOptions.create()
                 .setHelpURL(helpLink)
-                .setName((info.isCartSign() ? "cart" : "train") + " attachment")
+                .setName(String.format("%s Attachment Modifier", info.isCartSign() ? "Cart" : "Train"))
                 .setDescription(basicDesc);
         if (info.getTrackedSign().getHeader().isRC()) {
-            message.setDescription(basicDesc + "\n\nError: RC is not supported.").handle(info.getPlayer());
+            message.setDescription(basicDesc + ".\n\n§cError: RC is not supported").handle(info.getPlayer());
             message.handle(info.getPlayer());
             return false;
         }
@@ -108,10 +108,10 @@ public class SignActionAttachment extends CSBaseSignAction {
             YamlConfiguration config = pl.readFile("attachments", info.getLine(3));
             if (config == null) {
                 if (info.getLine(3).endsWith(".yml"))
-                    message.setDescription(basicDesc + "\n\nError: Config file not found. Do not include \".yml\"!");
-                else message.setDescription(basicDesc + "\n\nError: Config file not found.");
+                    message.setDescription(basicDesc + ".\n\n§cWarning: Config file not found. Do not include \".yml\"");
+                else message.setDescription(basicDesc + ".\n\n§cWarning: Config file not found");
                 message.handle(info.getPlayer());
-                return false;
+                return true;
             }
             message.handle(info.getPlayer());
             return true;
@@ -228,7 +228,7 @@ public class SignActionAttachment extends CSBaseSignAction {
     }
 
     public String description() {
-        return "§bAttachment Modifier\n§6§lSecond line: attachment\n§r§3" + basicDesc;
+        return String.format("§bAttachment Modifier\n§6§lSecond line: attachment\n§r§3This sign can %s.", basicDesc);
     }
 
     public String helpURL() {
