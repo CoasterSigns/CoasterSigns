@@ -8,6 +8,7 @@ import com.bergerkiller.bukkit.tc.events.SignChangeActionEvent;
 import com.bergerkiller.bukkit.tc.rails.RailLookup;
 import com.bergerkiller.bukkit.tc.signactions.SignAction;
 import com.bergerkiller.bukkit.tc.signactions.SignActionType;
+import com.bergerkiller.bukkit.tc.utils.SignBuildOptions;
 import dev.masp005.coastersigns.CoasterSigns;
 import dev.masp005.coastersigns.Util;
 import org.bukkit.Material;
@@ -93,19 +94,17 @@ public class SignActionAttachment extends CSBaseSignAction {
         }
     }
 
-    // TODO: Revamp after features are completed
     public boolean build(SignChangeActionEvent info) {
-        return true;
-        /*
         SignBuildOptions message = SignBuildOptions.create()
                 .setHelpURL(helpLink)
-                .setName((info.isCartSign() ? "cart" : "train") + " attachment");
-        message.setDescription(basicDesc);
+                .setName((info.isCartSign() ? "cart" : "train") + " attachment")
+                .setDescription(basicDesc);
         if (info.getTrackedSign().getHeader().isRC()) {
             message.setDescription(basicDesc + "\n\nError: RC is not supported.").handle(info.getPlayer());
+            message.handle(info.getPlayer());
             return false;
         }
-        if (isApplySign(info.getTrackedSign())) {
+        if (new ModSignType(info.getTrackedSign()).isApply) {
             YamlConfiguration config = pl.readFile("attachments", info.getLine(3));
             if (config == null) {
                 if (info.getLine(3).endsWith(".yml"))
@@ -114,12 +113,11 @@ public class SignActionAttachment extends CSBaseSignAction {
                 message.handle(info.getPlayer());
                 return false;
             }
+            message.handle(info.getPlayer());
             return true;
         }
-        message.setDescription(basicDesc + "\n\nError: Currently, the 3rd line needs to be \"apply\", 4th needs to point to a modification config file.").handle(info.getPlayer());
         message.handle(info.getPlayer());
-        return false;
-        */
+        return true;
     }
 
     /**
