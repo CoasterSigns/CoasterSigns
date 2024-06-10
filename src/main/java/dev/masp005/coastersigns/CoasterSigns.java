@@ -67,6 +67,8 @@ public final class CoasterSigns extends JavaPlugin {
 
         if (!getDataFolder().exists() && getDataFolder().mkdir())
             logInfo("Created Config File Folder.", "startup");
+        if (new File(getDataFolder(), "attachments").mkdir())
+            logInfo("Created Attachment Config File Folder.", "startup");
         saveDefaultConfig();
         config = getConfig();
 
