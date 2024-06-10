@@ -10,11 +10,12 @@ import com.bergerkiller.bukkit.tc.signactions.SignAction;
 import com.bergerkiller.bukkit.tc.signactions.SignActionType;
 import dev.masp005.coastersigns.CoasterSigns;
 import dev.masp005.coastersigns.Util;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.util.Vector;
 
 import java.util.Arrays;
 import java.util.List;
@@ -24,7 +25,7 @@ import java.util.Objects;
 public class SignActionAttachment extends CSBaseSignAction {
     static String name = "AttachmentSwitcher";
     static String debugName = "attchMod";
-    // subfeatures: apply, inline
+    // subfeatures: apply, inline, direction
     static String basicDesc = "Modifies the train or cart's attachments.";
     static String helpLink = "";
 
@@ -44,8 +45,15 @@ public class SignActionAttachment extends CSBaseSignAction {
     public void execute(SignActionEvent info) {
         if (!ready) return;
         if (!info.isPowered() || !info.getAction().isMovement()) return;
-        ModSignType type = evaluateModificationSignType(info.getTrackedSign());
+        if (!((info.isCartSign() && info.getAction() == SignActionType.MEMBER_ENTER) ||
+                (info.isTrainSign() && info.getAction() == SignActionType.GROUP_ENTER)))
+            return;
+        ModSignType type = new ModSignType(info.getTrackedSign());
+
         // TODO: Parse Movement Direction Parameters
+        pl.logInfo(String.format("Direction: %s Facing: %s Type dir: %s", info.getCartEnterDirection().toString(), info.getFacing().name(), type.direction), debugName + ".direction");
+        if (!type.matchDirection(info.getCartEnterDirection(), info.getFacing())) return;
+        pl.logInfo("Direction check passed.", debugName + ".direction");
         if (type.isApply) {
             String configName = info.getLine(3);
             YamlConfiguration config = pl.readFile("attachments", configName);
@@ -56,37 +64,31 @@ public class SignActionAttachment extends CSBaseSignAction {
             try {
                 if (!config.isSet("modifications"))
                     throw new IllegalArgumentException("AMC does not have modifications property");
-                if (info.isCartSign() && info.getAction() == SignActionType.MEMBER_ENTER) {
+                if (info.isCartSign()) {
                     applyAttachmentListConfigSingle(config, info.getMember());
-                    pl.logInfo(String.format("AMC %s applied. %s", configName, Util.blockCoordinates(info.getBlock())), debugName + ".apply");
-                }
-                if (info.isTrainSign() && info.getAction() == SignActionType.GROUP_ENTER) {
-                    pl.logInfo(String.format("Direction: %s Facing: %s", info.getCartEnterDirection().toString(), info.getFacing().name()), debugName + ".direction");
+                } else {
                     applyAttachmentListConfigGroup(config, info.getGroup());
-                    pl.logInfo(String.format("AMC %s applied. %s", configName, Util.blockCoordinates(info.getBlock())), debugName + ".apply");
                 }
+                pl.logInfo(String.format("AMC %s applied. %s", configName, Util.blockCoordinates(info.getBlock())), debugName + ".apply");
             } catch (Error e) {
                 pl.logWarn(String.format("AMC %s could not be applied. %s %s", configName, Util.blockCoordinates(info.getBlock()), e.toString()), debugName + ".apply");
             }
         } else {
-            if (info.isCartSign() && info.getAction() == SignActionType.MEMBER_ENTER || info.isTrainSign() && info.getAction() == SignActionType.GROUP_ENTER) {
-                YamlConfiguration modification = type.toSingleModConfig();
-                String modStr = info.getLine(3);
-                if (modStr.startsWith("i=")) modification.set("item", modStr.substring(2));
-                if (modStr.startsWith("t=")) modification.set("type", modStr.substring(2));
-                if (modStr.startsWith("m=")) modification.set("custommodeldata", Integer.parseInt(modStr.substring(2)));
+            YamlConfiguration modification = type.toSingleModConfig();
+            String modStr = info.getLine(3);
+            if (modStr.startsWith("i=")) modification.set("item", modStr.substring(2));
+            if (modStr.startsWith("t=")) modification.set("type", modStr.substring(2));
+            if (modStr.startsWith("m="))
+                modification.set("custommodeldata", Integer.parseInt(modStr.substring(2)));
 
-                pl.logInfo(String.format("Inline mod result %s:\n%s", Util.blockCoordinates(info.getBlock()), modification.saveToString()), debugName + ".inline.parse");
+            pl.logInfo(String.format("Inline mod result %s:\n%s", Util.blockCoordinates(info.getBlock()), modification.saveToString()), debugName + ".inline.parse");
 
-                if (info.isCartSign() && info.getAction() == SignActionType.MEMBER_ENTER) {
-                    applyAttachmentModification(modification, info.getMember());
-                    pl.logInfo(String.format("Inline member modification applied. %s", Util.blockCoordinates(info.getBlock())), debugName + ".inline");
-                }
-                if (info.isTrainSign() && info.getAction() == SignActionType.GROUP_ENTER) {
-                    pl.logInfo(String.format("Direction: %s Facing: %s", info.getCartEnterDirection().toString(), info.getFacing().name()), debugName + ".direction");
-                    applySingleAttachmentConfigGroup(modification, info.getGroup());
-                    pl.logInfo(String.format("Inline group modification applied. %s", Util.blockCoordinates(info.getBlock())), debugName + ".inline");
-                }
+            if (info.isCartSign()) {
+                applyAttachmentModification(modification, info.getMember());
+                pl.logInfo(String.format("Inline member modification applied. %s", Util.blockCoordinates(info.getBlock())), debugName + ".inline");
+            } else {
+                applySingleAttachmentConfigGroup(modification, info.getGroup());
+                pl.logInfo(String.format("Inline group modification applied. %s", Util.blockCoordinates(info.getBlock())), debugName + ".inline");
             }
         }
     }
@@ -118,52 +120,6 @@ public class SignActionAttachment extends CSBaseSignAction {
         message.handle(info.getPlayer());
         return false;
         */
-    }
-
-    /**
-     * Evaluates the third line of a sign of this type.
-     *
-     * @param sign The sign to evaluate
-     * @return A ModSignType object containing all info about this sign.
-     */
-    private ModSignType evaluateModificationSignType(RailLookup.TrackedSign sign) {
-        ModSignType result = new ModSignType();
-        String[] line2 = sign.getLine(2).trim().split(" ");
-
-        String target = line2[0];
-        if (target.equals("apply")) {
-            result.isApply = true;
-            result.isInline = false;
-        } else {
-            result.isApply = false;
-            result.isInline = true;
-            if (!target.equals("inline")) {
-                int rStartIdx = target.indexOf('r');
-                int cStartIdx = target.indexOf('c');
-                if (rStartIdx != -1 || cStartIdx != -1) {
-                    if (rStartIdx == -1) {
-                        result.child = target.substring(cStartIdx + 1);
-                    } else if (cStartIdx == -1) {
-                        result.range = target.substring(rStartIdx + 1);
-                    } else {
-                        if (rStartIdx < cStartIdx) {
-                            result.range = target.substring(rStartIdx + 1, cStartIdx);
-                            result.child = target.substring(cStartIdx + 1);
-                        } else {
-                            result.child = target.substring(cStartIdx + 1, rStartIdx);
-                            result.range = target.substring(rStartIdx + 1);
-                        }
-                    }
-                }
-            }
-        }
-
-        if (line2.length == 2) {
-            String direction = line2[1];
-            // TODO: parse direction
-            result.direction = direction.charAt(0);
-        } else result.direction = '*';
-        return result;
     }
 
     /**
@@ -292,12 +248,75 @@ public class SignActionAttachment extends CSBaseSignAction {
         public String child;
         public char direction;
 
+        public ModSignType(RailLookup.TrackedSign sign) {
+            String[] line2 = sign.getLine(2).trim().split(" ");
+
+            String target = line2[0];
+            if (target.equals("apply")) {
+                isApply = true;
+                isInline = false;
+            } else {
+                isApply = false;
+                isInline = true;
+                if (!target.equals("inline")) {
+                    int rStartIdx = target.indexOf('r');
+                    int cStartIdx = target.indexOf('c');
+                    if (rStartIdx != -1 || cStartIdx != -1) {
+                        if (rStartIdx == -1) {
+                            child = target.substring(cStartIdx + 1);
+                        } else if (cStartIdx == -1) {
+                            range = target.substring(rStartIdx + 1);
+                        } else {
+                            if (rStartIdx < cStartIdx) {
+                                range = target.substring(rStartIdx + 1, cStartIdx);
+                                child = target.substring(cStartIdx + 1);
+                            } else {
+                                child = target.substring(cStartIdx + 1, rStartIdx);
+                                range = target.substring(rStartIdx + 1);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (line2.length == 2) {
+                direction = line2[1].charAt(0);
+                if (direction == '<') direction = 'l';
+                if (direction == '>') direction = 'r';
+                if (!"rlneswud".contains(String.valueOf(direction))) direction = '*';
+            } else direction = '*';
+
+            BlockFace signDir = Util.nearestCartesianDirection(sign.getFacing());
+            if (direction == 'r' || direction == 'l') {
+                switch (signDir) {
+                    case NORTH:
+                        direction = (direction == 'r') ? 'w' : 'e';
+                        break;
+                    case SOUTH:
+                        direction = (direction != 'r') ? 'w' : 'e';
+                        break;
+                    case WEST:
+                        direction = (direction == 'r') ? 's' : 'n';
+                        break;
+                    case EAST:
+                        direction = (direction != 'r') ? 's' : 'n';
+                        break;
+                }
+            }
+        }
+
         public YamlConfiguration toSingleModConfig() {
             if (isApply) throw new IllegalStateException("Cannot create Mod Config for apply signs.");
             YamlConfiguration result = new YamlConfiguration();
             result.set("cart", range);
             result.set("child", child);
             return result;
+        }
+
+        public boolean matchDirection(Vector movement, BlockFace signDir) {
+            if (direction == '*') return true;
+            BlockFace movementDir = Util.nearestCartesianDirection(movement);
+            return Util.cartesianDirectionCharMap.get(direction).equals(movementDir);
         }
     }
 }

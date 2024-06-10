@@ -1,11 +1,25 @@
 package dev.masp005.coastersigns;
 
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.util.Vector;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class Util {
+    public static Map<Character, BlockFace> cartesianDirectionCharMap = new HashMap<>();
+
+    static {
+        cartesianDirectionCharMap.put('n', BlockFace.NORTH);
+        cartesianDirectionCharMap.put('s', BlockFace.SOUTH);
+        cartesianDirectionCharMap.put('w', BlockFace.WEST);
+        cartesianDirectionCharMap.put('e', BlockFace.EAST);
+        cartesianDirectionCharMap.put('u', BlockFace.UP);
+        cartesianDirectionCharMap.put('d', BlockFace.DOWN);
+    }
+
     /**
      * Turns a map of values into a YamlConfiguration
      *
@@ -88,5 +102,55 @@ public class Util {
         rangeMax = Math.min(max, rangeMax);
 
         return new int[]{rangeMin, rangeMax};
+    }
+
+    /**
+     * Returns the nearest cartesian BlockFace. Prioritises X∓-facing directions over Y∓-facing over Z∓-facing.
+     *
+     * @param direction The BlockFace to work off of.
+     * @return The nearest cartesian direction.
+     */
+    public static BlockFace nearestCartesianDirection(BlockFace direction) {
+        if (direction.isCartesian()) return direction;
+        return nearestCartesianDirection(direction.getDirection());
+    }
+
+    /**
+     * Returns the nearest cartesian BlockFace. Prioritises X∓-facing directions over Y∓-facing over Z∓-facing.
+     *
+     * @param direction The Vector direction to work off of.
+     * @return The nearest cartesian direction.
+     */
+    public static BlockFace nearestCartesianDirection(Vector direction) {
+        direction = direction.normalize();
+        int mostPotentSize = largestAbsoluteIndex(new double[]{direction.getX(), direction.getY(), direction.getZ()});
+        switch (mostPotentSize) {
+            case 0:
+                return direction.getX() > 0 ? BlockFace.EAST : BlockFace.WEST;
+            case 1:
+                return direction.getY() > 0 ? BlockFace.UP : BlockFace.DOWN;
+            case 2:
+                return direction.getZ() > 0 ? BlockFace.SOUTH : BlockFace.NORTH;
+        }
+        return BlockFace.NORTH; // never reachable but compilers won't shut up otherwise.
+    }
+
+    /**
+     * Calculates the index of the highest absolute value.
+     * Inputting an array containing 5,-7,2 would return 1, as -7 (absolute 7) is the highest value present and its index is 1.
+     *
+     * @param values The value array to work with.
+     * @return The index of the highest absolute value.
+     */
+    public static int largestAbsoluteIndex(double[] values) {
+        int maxIdx = -1;
+        double maxVal = 0;
+        for (int i = 0; i < values.length; i++) {
+            double value = Math.abs(values[i]);
+            if (value <= maxVal) continue;
+            maxIdx = i;
+            maxVal = value;
+        }
+        return maxIdx;
     }
 }
