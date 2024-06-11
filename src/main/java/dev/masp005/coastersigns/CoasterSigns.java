@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 
 public final class CoasterSigns extends JavaPlugin {
     private final Map<String, Boolean> featureWatchCache = new HashMap<>();
-    public List<CSBaseSignAction> signs;
+    private List<CSBaseSignAction> signs;
     private FileConfiguration config;
     private int verbosity;
     private Logger logger;
@@ -60,8 +60,6 @@ public final class CoasterSigns extends JavaPlugin {
             logger.info(feature + ": " + message);
     }
     //</editor-fold>
-
-    @Override
     public void onEnable() {
         logger = getLogger();
 
@@ -88,8 +86,6 @@ public final class CoasterSigns extends JavaPlugin {
 
         new CSCommand(this);
     }
-
-    @Override
     public void onDisable() {
     }
 
@@ -105,5 +101,9 @@ public final class CoasterSigns extends JavaPlugin {
         File file = new File(dir == null ? getDataFolder() : new File(getDataFolder(), dir), name + ".yml");
         if (!file.exists()) return null;
         return YamlConfiguration.loadConfiguration(file);
+    }
+
+    public List<CSBaseSignAction> getSigns() {
+        return signs;
     }
 }

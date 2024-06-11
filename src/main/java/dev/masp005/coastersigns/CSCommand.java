@@ -28,8 +28,6 @@ public class CSCommand implements CommandExecutor, TabCompleter {
             pl.logError("CoasterSigns command could not be registered.", "setup");
         }
     }
-
-    @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0 || args[0].equals("about")) {
             ComponentBuilder component =
@@ -49,7 +47,7 @@ public class CSCommand implements CommandExecutor, TabCompleter {
                 ComponentBuilder component = new ComponentBuilder("These signs are available:\n").color(ChatColor.AQUA);
 
                 boolean first = true;
-                for (CSBaseSignAction sign : pl.signs) {
+                for (CSBaseSignAction sign : pl.getSigns()) {
                     if (first) first = false;
                     else component.append(", ").reset().color(ChatColor.WHITE);
                     component.append(sign.name()).color(sign.isReady() ? ChatColor.GREEN : ChatColor.RED)
@@ -67,8 +65,6 @@ public class CSCommand implements CommandExecutor, TabCompleter {
         }
         return false;
     }
-
-    @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
         List<String> entries = new LinkedList<>();
         if (args.length == 0 || args.length == 1 && args[0].equals("")) {

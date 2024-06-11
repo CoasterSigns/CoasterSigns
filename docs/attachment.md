@@ -1,15 +1,15 @@
-**Attachment Modification**
+# **Attachment Modification**
 
 - Sign Type `attachment`
 - Used to change attachments on passing trains/carts
 - Feature Name: `attchMod`
     - Subnames: `apply`, `inline`, `direction`
 
-# Apply a modification file
+**Prerequisites:** A rough understanding of how TrainCarts Attachments work.
 
-## Sign Syntax:
+## Apply a modification
 
-### Apply Syntax
+### Config File Syntax
 
 ```
 [!train]
@@ -18,8 +18,13 @@ apply
 (filename)
 ```
 
-`filename` points to a file in the plugin's `attachments` subfolder excluding `.yml`. For example, the file
-at  `(server root)/plugins/CoasterSigns/attachments/lightsOff.yml` would be adressed with `lightsOff`.
+`filename` points to a file in the plugin's `attachments` subfolder excluding `.yml`.
+
+For example, the file at `plugins/CoasterSigns/attachments/lightsOff.yml` would be adressed with `lightsOff`.
+
+See the **modification file syntax** below.
+
+These files do not have to be reloaded, they are always re-read with every execution.
 
 ### Inline Syntax
 
@@ -30,9 +35,9 @@ attachments
 (modification)
 ```
 
-`target` is made up of a range, and a child target, both of which are optional The range is indicated by starting with "
-r", then providing a range in the same syntax as in the Modification file. The child element target is indicated by
-starting with "c", then providing a target in the same syntax as in the Modification file.
+`target` is made up of a range, and a child target, both of which are optional The range is indicated by starting with `
+r`, then providing a range in the same syntax as in the modification file. The child element target is indicated by
+starting with `c`, then providing a target in the same syntax as in the modification file.
 
 **Examples:**
 
@@ -48,7 +53,7 @@ starting with "c", then providing a target in the same syntax as in the Modifica
 - `t=(none/empty/item)` (type),
 - `m=(int)` (model)
 
-### Movement Direction Filter
+## Movement Direction Filter
 
 ```
 [!train]
@@ -62,7 +67,7 @@ letters.
 `>`, `<`, `right` and `left` (only applicable on physical signs) are used on signs to distinguish the train's movement
 relative to the sign.
 
-## Modification file Syntax:
+## Modification file syntax:
 
 ```yml
 modifications:
