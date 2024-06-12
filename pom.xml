@@ -6,7 +6,7 @@
 
     <groupId>dev.masp005</groupId>
     <artifactId>coastersigns</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
     <packaging>jar</packaging>
 
     <name>CoasterSigns</name>
@@ -95,6 +95,11 @@
                     <artifactId>spigot</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>22.0.0</version>
         </dependency>
     </dependencies>
 </project>

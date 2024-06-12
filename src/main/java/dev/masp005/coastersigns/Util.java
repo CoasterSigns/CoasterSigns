@@ -9,7 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Util {
-    public static Map<Character, BlockFace> cartesianDirectionCharMap = new HashMap<>();
+    public static final Map<Character, BlockFace> cartesianDirectionCharMap = new HashMap<>();
+    private static final Map<BlockFace, Integer> yawMap = new HashMap<>();
 
     static {
         cartesianDirectionCharMap.put('n', BlockFace.NORTH);
@@ -18,6 +19,18 @@ public class Util {
         cartesianDirectionCharMap.put('e', BlockFace.EAST);
         cartesianDirectionCharMap.put('u', BlockFace.UP);
         cartesianDirectionCharMap.put('d', BlockFace.DOWN);
+
+        BlockFace[] faces = {
+                BlockFace.SOUTH, BlockFace.SOUTH_SOUTH_WEST, BlockFace.SOUTH_WEST, BlockFace.WEST_SOUTH_WEST,
+                BlockFace.WEST, BlockFace.WEST_NORTH_WEST, BlockFace.NORTH_WEST, BlockFace.NORTH_NORTH_WEST,
+                BlockFace.NORTH, BlockFace.NORTH_NORTH_EAST, BlockFace.NORTH_EAST, BlockFace.EAST_NORTH_EAST,
+                BlockFace.EAST, BlockFace.EAST_SOUTH_EAST, BlockFace.SOUTH_EAST, BlockFace.SOUTH_SOUTH_EAST
+        };
+
+        for (int i = 0; i < faces.length; i++)
+            yawMap.put(faces[i], i * 360 / faces.length);
+        yawMap.put(BlockFace.UP, 0);
+        yawMap.put(BlockFace.DOWN, 0);
     }
 
     /**
@@ -37,13 +50,22 @@ public class Util {
      * Turns a block into human-readable coordinates
      *
      * @param block The block.
-     * @return Coordinates in the format "(X, Y, Z)".
+     * @return Coordinates in the format "X, Y, Z".
      */
     public static String blockCoordinates(Block block) {
-        return "(" +
-                block.getX() + ", " +
-                block.getY() + ", " +
-                block.getZ() + ")";
+        return blockCoordinates(block, ", ");
+    }
+
+    /**
+     * Turns a block into human-readable coordinates with a custom seperator between values.
+     *
+     * @param block The block.
+     * @return Coordinates in the format "X(seperator)Y(seperator)Z".
+     */
+    public static String blockCoordinates(Block block, String seperator) {
+        return block.getX() + seperator +
+                block.getY() + seperator +
+                block.getZ();
     }
 
     /**
@@ -133,6 +155,10 @@ public class Util {
                 return direction.getZ() > 0 ? BlockFace.SOUTH : BlockFace.NORTH;
         }
         return BlockFace.NORTH; // never reachable but compilers won't shut up otherwise.
+    }
+
+    public static int blockFaceYaw(BlockFace face) {
+        return yawMap.get(face);
     }
 
     /**

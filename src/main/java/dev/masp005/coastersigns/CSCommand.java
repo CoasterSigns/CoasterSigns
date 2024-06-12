@@ -10,12 +10,20 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
 public class CSCommand implements CommandExecutor, TabCompleter {
+    private static final List<String> firstArg = new LinkedList<>();
+
+    static {
+        firstArg.add("signs");
+        firstArg.add("signlist");
+    }
+
     private final CoasterSigns pl;
 
     public CSCommand(CoasterSigns plugin) {
@@ -28,7 +36,8 @@ public class CSCommand implements CommandExecutor, TabCompleter {
             pl.logError("CoasterSigns command could not be registered.", "setup");
         }
     }
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         if (args.length == 0 || args[0].equals("about")) {
             ComponentBuilder component =
                     new ComponentBuilder("\nCoasterSigns\n\n").color(ChatColor.AQUA).bold(true).underlined(true)
@@ -65,11 +74,16 @@ public class CSCommand implements CommandExecutor, TabCompleter {
         }
         return false;
     }
-    public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
+
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         List<String> entries = new LinkedList<>();
-        if (args.length == 0 || args.length == 1 && args[0].equals("")) {
-            entries.add("signlist");
-            entries.add("signs");
+        if (args.length == 0) {
+            return firstArg;
+        }
+        if (args.length == 1) {
+            for (String arg : firstArg) {
+                if (arg.startsWith(args[0])) entries.add(arg);
+            }
             return entries;
         }
         return null;

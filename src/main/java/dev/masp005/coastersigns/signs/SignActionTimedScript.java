@@ -10,28 +10,31 @@ import dev.masp005.coastersigns.CoasterSigns;
 import dev.masp005.coastersigns.Util;
 import org.bukkit.Bukkit;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class SignActionTimedScript extends CSBaseSignAction {
     static String name = "TimedScriptExecutor";
     static String debugName = "tmdScr";
     // subfeatures: execution
-    static String basicDesc = "Executes the given Script provided by TimedScripts.";
+    static String basicDesc = "execute a given Script provided by TimedScripts";
     static String helpLink = "https://github.com/CoasterSigns/CoasterSigns/blob/main/docs/timedscript.md";
 
     public final boolean ready;
     private final TimedScripts timedScriptsPlugin;
-    private final CoasterSigns pl;
+    private final CoasterSigns plugin;
 
     public SignActionTimedScript(CoasterSigns plugin) {
-        pl = plugin;
+        this.plugin = plugin;
         if (Bukkit.getPluginManager().getPlugin("timedscripts") == null) {
             ready = false;
             timedScriptsPlugin = null;
-            pl.logInfo("TrainCarts TimedScripts Executor could not be registered.", "setup");
+            plugin.logInfo("TrainCarts TimedScripts Executor could not be registered.", "setup");
         } else {
             ready = true;
             timedScriptsPlugin = ((TimedScripts) Bukkit.getPluginManager().getPlugin("timedscripts"));
             SignAction.register(this);
-            pl.logInfo("TrainCarts TimedScripts Executor has been registered.", "setup");
+            plugin.logInfo("TrainCarts TimedScripts Executor has been registered.", "setup");
         }
     }
 
@@ -42,17 +45,34 @@ public class SignActionTimedScript extends CSBaseSignAction {
     public void execute(SignActionEvent info) {
         if (!ready) return;
         if (!info.isPowered() || !info.isAction(SignActionType.GROUP_ENTER)) return;
-        if (timedScriptsPlugin.getScriptManager().runScript(Bukkit.getConsoleSender(), info.getLine(2)))
-            pl.logInfo("Script " + info.getLine(2) + " executed." + Util.blockCoordinates(info.getBlock()), debugName + ".execution");
+
+        Map<String, String> replacements = new HashMap<>();
+        replacements.put("sender", "CoasterSigns Sign");
+        replacements.put("senderworld", info.getWorld().getName());
+        replacements.put("senderx", String.valueOf(info.getBlock().getX()));
+        replacements.put("sendery", String.valueOf(info.getBlock().getY()));
+        replacements.put("senderz", String.valueOf(info.getBlock().getZ()));
+        replacements.put("senderyaw", String.valueOf(Util.blockFaceYaw(info.getFacing())));
+        replacements.put("senderpitch", "0");
+        replacements.put("senderlocation", Util.blockCoordinates(info.getBlock(), " "));
+
+        String line4 = info.getLine(3);
+        if (info.getLine(3).contains("=")) {
+            int equalIdx = line4.indexOf('=');
+            replacements.put(line4.substring(0, equalIdx), line4.substring(equalIdx + 1));
+        }
+
+        if (timedScriptsPlugin.getScriptManager().runScript(Bukkit.getConsoleSender(), info.getLine(2), replacements))
+            plugin.logInfo(String.format("Script %s executed. (%s)", info.getLine(2), Util.blockCoordinates(info.getBlock())), debugName + ".execution");
         else
-            pl.logWarn("Script " + info.getLine(2) + " not found! " + Util.blockCoordinates(info.getBlock()), debugName + ".execution");
+            plugin.logWarn(String.format("Script %s not found! (%s)", info.getLine(2), Util.blockCoordinates(info.getBlock())), debugName + ".execution");
     }
 
     public boolean build(SignChangeActionEvent info) {
         SignBuildOptions message = SignBuildOptions.create()
                 .setHelpURL(helpLink)
                 .setName("TimedScript Executor")
-                .setDescription(ready ? basicDesc : basicDesc + ".\n\n§cError: TimedScripts is not installed, so this sign will not work.");
+                .setDescription(ready ? basicDesc : basicDesc + ".\n\n§cError: TimedScripts is not installed, so this sign will not work");
         message.handle(info.getPlayer());
         return ready;
     }
@@ -62,7 +82,7 @@ public class SignActionTimedScript extends CSBaseSignAction {
     }
 
     public String description() {
-        return "§bTimedScipts Executor\n§6§lSecond line: timedscript\n§r§3" + basicDesc + (ready ? "" : "\n\n§cRequires TimedScripts to be installed.");
+        return String.format("§bTimedScipts Executor\n§6§lSecond line: timedscript\n§r§3This sign can %s.", basicDesc) + (ready ? "" : "\n\n§cRequires TimedScripts to be installed.");
     }
 
     public String helpURL() {
@@ -72,4 +92,5 @@ public class SignActionTimedScript extends CSBaseSignAction {
     public boolean isReady() {
         return ready;
     }
+
 }

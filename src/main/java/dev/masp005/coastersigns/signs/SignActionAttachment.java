@@ -59,7 +59,7 @@ public class SignActionAttachment extends CSBaseSignAction {
             // Considering caching...
             YamlConfiguration config = plugin.readFile("attachments", configName);
             if (config == null) {
-                plugin.logWarn("AMC " + configName + " does not exist. " + Util.blockCoordinates(info.getBlock()), debugName + ".apply");
+                plugin.logWarn(String.format("AMC %s does not exist. (%s)", configName, Util.blockCoordinates(info.getBlock())), debugName + ".apply");
                 return;
             }
             try {
@@ -67,9 +67,9 @@ public class SignActionAttachment extends CSBaseSignAction {
                     throw new IllegalArgumentException("AMC does not have modifications property");
                 if (info.isCartSign()) applyAttachmentListConfigSingle(config, info.getMember());
                 else applyAttachmentListConfigGroup(config, info.getGroup());
-                plugin.logInfo(String.format("AMC %s applied. %s", configName, Util.blockCoordinates(info.getBlock())), debugName + ".apply");
+                plugin.logInfo(String.format("AMC %s applied. (%s)", configName, Util.blockCoordinates(info.getBlock())), debugName + ".apply");
             } catch (Error e) {
-                plugin.logWarn(String.format("AMC %s could not be applied. %s %s", configName, Util.blockCoordinates(info.getBlock()), e.toString()), debugName + ".apply");
+                plugin.logWarn(String.format("AMC %s could not be applied. %s (%s)", configName, Util.blockCoordinates(info.getBlock()), e.toString()), debugName + ".apply");
             }
         } else {
             YamlConfiguration modification = type.toSingleModConfig();
@@ -79,17 +79,17 @@ public class SignActionAttachment extends CSBaseSignAction {
             if (modStr.startsWith("m="))
                 modification.set("custommodeldata", Integer.parseInt(modStr.substring(2)));
 
-            plugin.logInfo(String.format("Inline mod result %s:\n%s", Util.blockCoordinates(info.getBlock()), modification.saveToString()), debugName + ".inline.parse");
+            plugin.logInfo(String.format("Inline mod result (%s):\n%s", Util.blockCoordinates(info.getBlock()), modification.saveToString()), debugName + ".inline.parse");
             try {
                 if (info.isCartSign()) {
                     applyAttachmentModification(modification, info.getMember());
-                    plugin.logInfo(String.format("Inline member modification applied. %s", Util.blockCoordinates(info.getBlock())), debugName + ".inline");
+                    plugin.logInfo(String.format("Inline member modification applied. (%s)", Util.blockCoordinates(info.getBlock())), debugName + ".inline");
                 } else {
                     applySingleAttachmentConfigGroup(modification, info.getGroup());
-                    plugin.logInfo(String.format("Inline group modification applied. %s", Util.blockCoordinates(info.getBlock())), debugName + ".inline");
+                    plugin.logInfo(String.format("Inline group modification applied. (%s)", Util.blockCoordinates(info.getBlock())), debugName + ".inline");
                 }
             } catch (Error e) {
-                plugin.logWarn(String.format("Inline modification failed. %s %s", Util.blockCoordinates(info.getBlock()), e.toString()), debugName + ".apply");
+                plugin.logWarn(String.format("Inline modification failed. (%s) %s", Util.blockCoordinates(info.getBlock()), e.toString()), debugName + ".apply");
             }
         }
     }
