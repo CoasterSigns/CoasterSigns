@@ -28,7 +28,7 @@ public class SignActionAttachment extends CSBaseSignAction {
     static String debugName = "attchMod";
     // subfeatures: apply, inline, direction
     static String basicDesc = "modify the train or cart's attachments";
-    static String helpLink = "https://github.com/CoasterSigns/CoasterSigns/blob/main/docs/attachment.md";
+    static String helpLink = "https://coastersigns.github.io/signs/attachment.html";
 
     public final boolean ready = true;
     private final CoasterSigns plugin;

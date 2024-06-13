@@ -18,7 +18,7 @@ public class SignActionTimedScript extends CSBaseSignAction {
     static String debugName = "tmdScr";
     // subfeatures: execution
     static String basicDesc = "execute a given Script provided by TimedScripts";
-    static String helpLink = "https://github.com/CoasterSigns/CoasterSigns/blob/main/docs/timedscript.md";
+    static String helpLink = "https://coastersigns.github.io/signs/timedscript.html";
 
     public final boolean ready;
     private final TimedScripts timedScriptsPlugin;
