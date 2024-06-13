@@ -43,8 +43,10 @@ public class SignActionTimedScript extends CSBaseSignAction {
     }
 
     public void execute(SignActionEvent info) {
-        if (!ready) return;
-        if (!info.isPowered() || !info.isAction(SignActionType.GROUP_ENTER)) return;
+        if (!ready)
+            return;
+        if (!info.isPowered() || !info.isAction(SignActionType.GROUP_ENTER))
+            return;
 
         Map<String, String> replacements = new HashMap<>();
         replacements.put("sender", "CoasterSigns Sign");
@@ -63,16 +65,21 @@ public class SignActionTimedScript extends CSBaseSignAction {
         }
 
         if (timedScriptsPlugin.getScriptManager().runScript(Bukkit.getConsoleSender(), info.getLine(2), replacements))
-            plugin.logInfo(String.format("Script %s executed. (%s)", info.getLine(2), Util.blockCoordinates(info.getBlock())), debugName + ".execution");
+            plugin.logInfo(
+                    String.format("Script %s executed. (%s)", info.getLine(2), Util.blockCoordinates(info.getBlock())),
+                    debugName + ".execution");
         else
-            plugin.logWarn(String.format("Script %s not found! (%s)", info.getLine(2), Util.blockCoordinates(info.getBlock())), debugName + ".execution");
+            plugin.logWarn(
+                    String.format("Script %s not found! (%s)", info.getLine(2), Util.blockCoordinates(info.getBlock())),
+                    debugName + ".execution");
     }
 
     public boolean build(SignChangeActionEvent info) {
         SignBuildOptions message = SignBuildOptions.create()
                 .setHelpURL(helpLink)
                 .setName("TimedScript Executor")
-                .setDescription(ready ? basicDesc : basicDesc + ".\n\n§cError: TimedScripts is not installed, so this sign will not work");
+                .setDescription(ready ? basicDesc
+                        : basicDesc + ".\n\n§cError: TimedScripts is not installed, so this sign will not work");
         message.handle(info.getPlayer());
         return ready;
     }
@@ -82,7 +89,8 @@ public class SignActionTimedScript extends CSBaseSignAction {
     }
 
     public String description() {
-        return String.format("§bTimedScipts Executor\n§6§lSecond line: timedscript\n§r§3This sign can %s.", basicDesc) + (ready ? "" : "\n\n§cRequires TimedScripts to be installed.");
+        return String.format("§bTimedScipts Executor\n§6§lSecond line: timedscript\n§r§3This sign can %s.", basicDesc)
+                + (ready ? "" : "\n\n§cRequires TimedScripts to be installed.");
     }
 
     public String helpURL() {

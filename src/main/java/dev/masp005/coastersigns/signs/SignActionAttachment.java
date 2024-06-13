@@ -44,52 +44,68 @@ public class SignActionAttachment extends CSBaseSignAction {
     }
 
     public void execute(SignActionEvent info) {
-        if (!ready) return;
-        if (!info.isPowered() || !info.getAction().isMovement()) return;
+        if (!ready)
+            return;
+        if (!info.isPowered() || !info.getAction().isMovement())
+            return;
         if (!((info.isCartSign() && info.getAction() == SignActionType.MEMBER_ENTER) ||
                 (info.isTrainSign() && info.getAction() == SignActionType.GROUP_ENTER)))
             return;
         ModSignType type = new ModSignType(info.getTrackedSign());
 
-        plugin.logInfo(String.format("Direction: %s Facing: %s Type dir: %s", info.getCartEnterDirection().toString(), info.getFacing().name(), type.direction), debugName + ".direction");
-        if (!type.matchDirection(info.getCartEnterDirection())) return;
+        plugin.logInfo(String.format("Direction: %s Facing: %s Type dir: %s", info.getCartEnterDirection().toString(),
+                info.getFacing().name(), type.direction), debugName + ".direction");
+        if (!type.matchDirection(info.getCartEnterDirection()))
+            return;
 
         if (type.isApply) {
             String configName = info.getLine(3);
             // Considering caching...
             YamlConfiguration config = plugin.readFile("attachments", configName);
             if (config == null) {
-                plugin.logWarn(String.format("AMC %s does not exist. (%s)", configName, Util.blockCoordinates(info.getBlock())), debugName + ".apply");
+                plugin.logWarn(String.format("AMC %s does not exist. (%s)", configName,
+                        Util.blockCoordinates(info.getBlock())), debugName + ".apply");
                 return;
             }
             try {
                 if (!config.isSet("modifications"))
                     throw new IllegalArgumentException("AMC does not have modifications property");
-                if (info.isCartSign()) applyAttachmentListConfigSingle(config, info.getMember());
-                else applyAttachmentListConfigGroup(config, info.getGroup());
-                plugin.logInfo(String.format("AMC %s applied. (%s)", configName, Util.blockCoordinates(info.getBlock())), debugName + ".apply");
+                if (info.isCartSign())
+                    applyAttachmentListConfigSingle(config, info.getMember());
+                else
+                    applyAttachmentListConfigGroup(config, info.getGroup());
+                plugin.logInfo(
+                        String.format("AMC %s applied. (%s)", configName, Util.blockCoordinates(info.getBlock())),
+                        debugName + ".apply");
             } catch (Error e) {
-                plugin.logWarn(String.format("AMC %s could not be applied. %s (%s)", configName, Util.blockCoordinates(info.getBlock()), e.toString()), debugName + ".apply");
+                plugin.logWarn(String.format("AMC %s could not be applied. %s (%s)", configName,
+                        Util.blockCoordinates(info.getBlock()), e.toString()), debugName + ".apply");
             }
         } else {
             YamlConfiguration modification = type.toSingleModConfig();
             String modStr = info.getLine(3);
-            if (modStr.startsWith("i=")) modification.set("item", modStr.substring(2));
-            if (modStr.startsWith("t=")) modification.set("type", modStr.substring(2));
+            if (modStr.startsWith("i="))
+                modification.set("item", modStr.substring(2));
+            if (modStr.startsWith("t="))
+                modification.set("type", modStr.substring(2));
             if (modStr.startsWith("m="))
                 modification.set("custommodeldata", Integer.parseInt(modStr.substring(2)));
 
-            plugin.logInfo(String.format("Inline mod result (%s):\n%s", Util.blockCoordinates(info.getBlock()), modification.saveToString()), debugName + ".inline.parse");
+            plugin.logInfo(String.format("Inline mod result (%s):\n%s", Util.blockCoordinates(info.getBlock()),
+                    modification.saveToString()), debugName + ".inline.parse");
             try {
                 if (info.isCartSign()) {
                     applyAttachmentModification(modification, info.getMember());
-                    plugin.logInfo(String.format("Inline member modification applied. (%s)", Util.blockCoordinates(info.getBlock())), debugName + ".inline");
+                    plugin.logInfo(String.format("Inline member modification applied. (%s)",
+                            Util.blockCoordinates(info.getBlock())), debugName + ".inline");
                 } else {
                     applySingleAttachmentConfigGroup(modification, info.getGroup());
-                    plugin.logInfo(String.format("Inline group modification applied. (%s)", Util.blockCoordinates(info.getBlock())), debugName + ".inline");
+                    plugin.logInfo(String.format("Inline group modification applied. (%s)",
+                            Util.blockCoordinates(info.getBlock())), debugName + ".inline");
                 }
             } catch (Error e) {
-                plugin.logWarn(String.format("Inline modification failed. (%s) %s", Util.blockCoordinates(info.getBlock()), e.toString()), debugName + ".apply");
+                plugin.logWarn(String.format("Inline modification failed. (%s) %s",
+                        Util.blockCoordinates(info.getBlock()), e.toString()), debugName + ".apply");
             }
         }
     }
@@ -108,8 +124,10 @@ public class SignActionAttachment extends CSBaseSignAction {
             YamlConfiguration config = plugin.readFile("attachments", info.getLine(3));
             if (config == null) {
                 if (info.getLine(3).endsWith(".yml"))
-                    message.setDescription(basicDesc + ".\n\n§cWarning: Config file not found. Do not include \".yml\"");
-                else message.setDescription(basicDesc + ".\n\n§cWarning: Config file not found");
+                    message.setDescription(
+                            basicDesc + ".\n\n§cWarning: Config file not found. Do not include \".yml\"");
+                else
+                    message.setDescription(basicDesc + ".\n\n§cWarning: Config file not found");
                 message.handle(info.getPlayer());
                 return true;
             }
@@ -121,7 +139,8 @@ public class SignActionAttachment extends CSBaseSignAction {
     }
 
     /**
-     * Applies an Attachment Modification Config (AMC) to a MinecartGroup (a TrainCarts Train)
+     * Applies an Attachment Modification Config (AMC) to a MinecartGroup (a
+     * TrainCarts Train)
      *
      * @param config The AMC to apply.
      * @param group  The group to apply it to.
@@ -130,10 +149,12 @@ public class SignActionAttachment extends CSBaseSignAction {
         List<Map<?, ?>> mods = config.getMapList("modifications");
         plugin.logInfo("Modification count: " + mods.size(), debugName + ".apply.groupConf");
 
-        if (mods.size() == 0) return;
+        if (mods.size() == 0)
+            return;
         for (int i = 0; i < mods.size(); i++) {
             YamlConfiguration modConfig = Util.makeConfig(mods.get(i));
-            plugin.logInfo(String.format("Applying #%d: %s", i, modConfig.saveToString()), debugName + ".apply.groupConf");
+            plugin.logInfo(String.format("Applying #%d: %s", i, modConfig.saveToString()),
+                    debugName + ".apply.groupConf");
             applySingleAttachmentConfigGroup(modConfig, group);
         }
     }
@@ -153,7 +174,8 @@ public class SignActionAttachment extends CSBaseSignAction {
     }
 
     /**
-     * Applies an Attachment Modification Config (AMC) to a single TrainCarts-registered cart
+     * Applies an Attachment Modification Config (AMC) to a single
+     * TrainCarts-registered cart
      *
      * @param config The AMC to apply.
      * @param member The cart to apply it to.
@@ -161,16 +183,19 @@ public class SignActionAttachment extends CSBaseSignAction {
     private void applyAttachmentListConfigSingle(YamlConfiguration config, MinecartMember<?> member) {
         List<Map<?, ?>> mods = config.getMapList("modifications");
 
-        if (mods.size() == 0) return;
+        if (mods.size() == 0)
+            return;
         for (int i = 0; i < mods.size(); i++) {
             YamlConfiguration modConfig = Util.makeConfig(mods.get(i));
-            plugin.logInfo(String.format("Applying #%d: %s", i, modConfig.saveToString()), debugName + ".apply.singleConf");
+            plugin.logInfo(String.format("Applying #%d: %s", i, modConfig.saveToString()),
+                    debugName + ".apply.singleConf");
             applyAttachmentModification(modConfig, member);
         }
     }
 
     /**
-     * Applies a singular modification from an AMC to a single TrainCarts-registered cart.
+     * Applies a singular modification from an AMC to a single TrainCarts-registered
+     * cart.
      *
      * @param config The AMC to apply.
      * @param member The cart to apply it to.
@@ -183,11 +208,13 @@ public class SignActionAttachment extends CSBaseSignAction {
         if (config.isSet("child")) {
             Object childRaw = config.get("child");
 
-            if (childRaw instanceof Integer) target = target.getChildren().get((int) childRaw);
+            if (childRaw instanceof Integer)
+                target = target.getChildren().get((int) childRaw);
             else if (childRaw instanceof String) {
                 for (String s : ((String) childRaw).split(":"))
                     target = target.getChildren().get(Integer.parseInt(s));
-            } else throw new IllegalArgumentException("\"child\" property is incorrectly formatted");
+            } else
+                throw new IllegalArgumentException("\"child\" property is incorrectly formatted");
         }
         if (config.isSet("type")) {
             String type = Objects.requireNonNull(config.getString("type")).toLowerCase();
@@ -243,7 +270,6 @@ public class SignActionAttachment extends CSBaseSignAction {
 
     private static class ModSignType {
         public boolean isApply;
-        public boolean isInline;
         public String range;
         public String child;
         public char direction;
@@ -254,10 +280,8 @@ public class SignActionAttachment extends CSBaseSignAction {
             String target = line2[0];
             if (target.equals("apply")) {
                 isApply = true;
-                isInline = false;
             } else {
                 isApply = false;
-                isInline = true;
                 if (!target.equals("inline")) {
                     int rStartIdx = target.indexOf('r');
                     int cStartIdx = target.indexOf('c');
@@ -281,10 +305,14 @@ public class SignActionAttachment extends CSBaseSignAction {
 
             if (line2.length == 2) {
                 direction = line2[1].charAt(0);
-                if (direction == '<') direction = 'l';
-                if (direction == '>') direction = 'r';
-                if (!"rlneswud".contains(String.valueOf(direction))) direction = '*';
-            } else direction = '*';
+                if (direction == '<')
+                    direction = 'l';
+                if (direction == '>')
+                    direction = 'r';
+                if (!"rlneswud".contains(String.valueOf(direction)))
+                    direction = '*';
+            } else
+                direction = '*';
 
             BlockFace signDir = Util.nearestCartesianDirection(sign.getFacing());
             if (direction == 'r' || direction == 'l') {
@@ -301,12 +329,14 @@ public class SignActionAttachment extends CSBaseSignAction {
                     case EAST:
                         direction = (direction != 'r') ? 's' : 'n';
                         break;
+                    default:
                 }
             }
         }
 
         public YamlConfiguration toSingleModConfig() {
-            if (isApply) throw new IllegalStateException("Cannot create Mod Config for apply signs.");
+            if (isApply)
+                throw new IllegalStateException("Cannot create Mod Config for apply signs.");
             YamlConfiguration result = new YamlConfiguration();
             result.set("cart", range);
             result.set("child", child);
@@ -314,7 +344,8 @@ public class SignActionAttachment extends CSBaseSignAction {
         }
 
         public boolean matchDirection(Vector movement) {
-            if (direction == '*') return true;
+            if (direction == '*')
+                return true;
             BlockFace movementDir = Util.nearestCartesianDirection(movement);
             return Util.cartesianDirectionCharMap.get(direction).equals(movementDir);
         }

@@ -24,9 +24,10 @@ public final class CoasterSigns extends JavaPlugin {
     private Logger logger;
     private List<String> featureWatch;
 
-    //<editor-fold desc="Logging Methods" defaultstate="collapsed">
+    // <editor-fold desc="Logging Methods" defaultstate="collapsed">
     private boolean checkFeatureWatch(String feature) {
-        if (featureWatchCache.containsKey(feature)) return featureWatchCache.get(feature);
+        if (featureWatchCache.containsKey(feature))
+            return featureWatchCache.get(feature);
         boolean result = false;
         for (String watchedFeature : featureWatch) {
             if (feature.startsWith(watchedFeature) && // targets same (sub)feature
@@ -59,7 +60,8 @@ public final class CoasterSigns extends JavaPlugin {
         if (verbosity >= 4 || checkFeatureWatch(feature))
             logger.info(feature + ": " + message);
     }
-    //</editor-fold>
+    // </editor-fold>
+
     public void onEnable() {
         logger = getLogger();
 
@@ -71,12 +73,12 @@ public final class CoasterSigns extends JavaPlugin {
         config = getConfig();
 
         String verbosityStr = config.getString("verbosity");
-        if (verbosityStr == null) verbosity = 4;
+        if (verbosityStr == null)
+            verbosity = 4;
         else {
             verbosityStr = verbosityStr.toLowerCase();
-            verbosity = verbosityStr.equals("fatal") ? 1 :
-                    verbosityStr.equals("error") ? 2 :
-                            verbosityStr.equals("all") ? 4 : 3;
+            verbosity = verbosityStr.equals("fatal") ? 1
+                    : verbosityStr.equals("error") ? 2 : verbosityStr.equals("all") ? 4 : 3;
         }
         featureWatch = config.getStringList("watchFeatures");
 
@@ -86,20 +88,24 @@ public final class CoasterSigns extends JavaPlugin {
 
         new CSCommand(this);
     }
+
     public void onDisable() {
     }
 
     /**
-     * Reads the YAML configuration at (dir)/(name).yml and returns it as a parsed YamlConfiguration
+     * Reads the YAML configuration at (dir)/(name).yml and returns it as a parsed
+     * YamlConfiguration
      *
      * @param dir  The name of the subdirectory from the plugin's config directory
      * @param name The name of the file, excluding the file extension
-     * @return The parsed config as a YamlConfiguration, or null if it could not be found
+     * @return The parsed config as a YamlConfiguration, or null if it could not be
+     *         found
      */
     @Nullable
     public YamlConfiguration readFile(@Nullable String dir, String name) {
         File file = new File(dir == null ? getDataFolder() : new File(getDataFolder(), dir), name + ".yml");
-        if (!file.exists()) return null;
+        if (!file.exists())
+            return null;
         return YamlConfiguration.loadConfiguration(file);
     }
 

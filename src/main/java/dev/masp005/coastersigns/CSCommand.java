@@ -37,16 +37,17 @@ public class CSCommand implements CommandExecutor, TabCompleter {
         }
     }
 
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label,
+            String[] args) {
         if (args.length == 0 || args[0].equals("about")) {
-            ComponentBuilder component =
-                    new ComponentBuilder("\nCoasterSigns\n\n").color(ChatColor.AQUA).bold(true).underlined(true)
-                            .append("Version: " + pl.getDescription().getVersion()).reset().color(ChatColor.LIGHT_PURPLE)
-                            .event(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://semver.org"))
-                            .append("\n").reset()
-                            .append("Join the Discord").color(ChatColor.BLUE).bold(true)
-                            .event(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://discord.gg/4433WMu5bj"))
-                            .append("\n").reset();
+            ComponentBuilder component = new ComponentBuilder("\nCoasterSigns\n\n").color(ChatColor.AQUA).bold(true)
+                    .underlined(true)
+                    .append("Version: " + pl.getDescription().getVersion()).reset().color(ChatColor.LIGHT_PURPLE)
+                    .event(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://semver.org"))
+                    .append("\n").reset()
+                    .append("Join the Discord").color(ChatColor.BLUE).bold(true)
+                    .event(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://discord.gg/4433WMu5bj"))
+                    .append("\n").reset();
             sender.spigot().sendMessage(component.create());
             return true;
         }
@@ -57,14 +58,17 @@ public class CSCommand implements CommandExecutor, TabCompleter {
 
                 boolean first = true;
                 for (CSBaseSignAction sign : pl.getSigns()) {
-                    if (first) first = false;
-                    else component.append(", ").reset().color(ChatColor.WHITE);
+                    if (first)
+                        first = false;
+                    else
+                        component.append(", ").reset().color(ChatColor.WHITE);
                     component.append(sign.name()).color(sign.isReady() ? ChatColor.GREEN : ChatColor.RED)
                             .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(sign.description())))
                             .event(new ClickEvent(ClickEvent.Action.OPEN_URL, sign.helpURL()));
                 }
 
-                component.append("\n\nYou can hover and click each feature for more info. Additionally, you can ").reset().color(ChatColor.AQUA)
+                component.append("\n\nYou can hover and click each feature for more info. Additionally, you can ")
+                        .reset().color(ChatColor.AQUA)
                         .append("join the discord").color(ChatColor.BLUE).underlined(true)
                         .event(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://discord.gg/4433WMu5bj"))
                         .append(" for further documentation.").reset().color(ChatColor.AQUA);
@@ -75,14 +79,16 @@ public class CSCommand implements CommandExecutor, TabCompleter {
         return false;
     }
 
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label,
+            String[] args) {
         List<String> entries = new LinkedList<>();
         if (args.length == 0) {
             return firstArg;
         }
         if (args.length == 1) {
             for (String arg : firstArg) {
-                if (arg.startsWith(args[0])) entries.add(arg);
+                if (arg.startsWith(args[0]))
+                    entries.add(arg);
             }
             return entries;
         }

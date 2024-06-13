@@ -19,7 +19,8 @@ public abstract class CSBaseSignAction extends SignAction {
     public abstract String helpURL();
 
     /**
-     * @return Whether or not the sign can be used based on dependencies being installed.
+     * @return Whether or not the sign can be used based on dependencies being
+     *         installed.
      */
     public abstract boolean isReady();
 }

@@ -57,7 +57,8 @@ public class Util {
     }
 
     /**
-     * Turns a block into human-readable coordinates with a custom seperator between values.
+     * Turns a block into human-readable coordinates with a custom seperator between
+     * values.
      *
      * @param block The block.
      * @return Coordinates in the format "X(seperator)Y(seperator)Z".
@@ -70,7 +71,8 @@ public class Util {
 
     /**
      * Evaluates an unknown-type input into a minimum and maximum range
-     * based on the format n..m where both n and m can be omitted to reference the respective extremes.
+     * based on the format n..m where both n and m can be omitted to reference the
+     * respective extremes.
      *
      * @param rangeRaw Unsanitized input to be evaluated
      * @param max      The maximum possible index
@@ -80,10 +82,14 @@ public class Util {
     public static int[] evaluateRange(Object rangeRaw, int max) throws IllegalArgumentException {
         String range;
 
-        if (rangeRaw instanceof Integer) range = String.valueOf(rangeRaw);
-        else if (rangeRaw instanceof String) range = (String) rangeRaw;
-        else if (rangeRaw == null) range = "..";
-        else throw new IllegalArgumentException("Incorrectly formatted range.");
+        if (rangeRaw instanceof Integer)
+            range = String.valueOf(rangeRaw);
+        else if (rangeRaw instanceof String)
+            range = (String) rangeRaw;
+        else if (rangeRaw == null)
+            range = "..";
+        else
+            throw new IllegalArgumentException("Incorrectly formatted range.");
 
         try {
             return evaluateRange(range.trim(), max);
@@ -94,7 +100,8 @@ public class Util {
 
     /**
      * Evaluates a String input into a minimum and maximum range
-     * based on the format n..m where both n and m can be omitted to reference the respective extremes.
+     * based on the format n..m where both n and m can be omitted to reference the
+     * respective extremes.
      *
      * @param range Sanitized input to be evaluated
      * @param max   The maximum possible index
@@ -123,29 +130,33 @@ public class Util {
         rangeMin = Math.max(0, rangeMin);
         rangeMax = Math.min(max, rangeMax);
 
-        return new int[]{rangeMin, rangeMax};
+        return new int[] { rangeMin, rangeMax };
     }
 
     /**
-     * Returns the nearest cartesian BlockFace. Prioritises X∓-facing directions over Y∓-facing over Z∓-facing.
+     * Returns the nearest cartesian BlockFace. Prioritises X∓-facing directions
+     * over Y∓-facing over Z∓-facing.
      *
      * @param direction The BlockFace to work off of.
      * @return The nearest cartesian direction.
      */
     public static BlockFace nearestCartesianDirection(BlockFace direction) {
-        if (direction.isCartesian()) return direction;
+        if (direction.isCartesian())
+            return direction;
         return nearestCartesianDirection(direction.getDirection());
     }
 
     /**
-     * Returns the nearest cartesian BlockFace. Prioritises X∓-facing directions over Y∓-facing over Z∓-facing.
+     * Returns the nearest cartesian BlockFace. Prioritises X∓-facing directions
+     * over Y∓-facing over Z∓-facing.
      *
      * @param direction The Vector direction to work off of.
      * @return The nearest cartesian direction.
      */
     public static BlockFace nearestCartesianDirection(Vector direction) {
         direction = direction.normalize();
-        int mostPotentSize = largestAbsoluteIndex(new double[]{direction.getX(), direction.getY(), direction.getZ()});
+        int mostPotentSize = largestAbsoluteIndex(
+                new double[] { direction.getX(), direction.getY(), direction.getZ() });
         switch (mostPotentSize) {
             case 0:
                 return direction.getX() > 0 ? BlockFace.EAST : BlockFace.WEST;
@@ -163,7 +174,8 @@ public class Util {
 
     /**
      * Calculates the index of the highest absolute value.
-     * Inputting an array containing 5,-7,2 would return 1, as -7 (absolute 7) is the highest value present and its index is 1.
+     * Inputting an array containing 5,-7,2 would return 1, as -7 (absolute 7) is
+     * the highest value present and its index is 1.
      *
      * @param values The value array to work with.
      * @return The index of the highest absolute value.
@@ -173,7 +185,8 @@ public class Util {
         double maxVal = 0;
         for (int i = 0; i < values.length; i++) {
             double value = Math.abs(values[i]);
-            if (value <= maxVal) continue;
+            if (value <= maxVal)
+                continue;
             maxIdx = i;
             maxVal = value;
         }
