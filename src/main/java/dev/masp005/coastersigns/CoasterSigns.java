@@ -20,11 +20,31 @@ public final class CoasterSigns extends JavaPlugin {
     private final Map<String, Boolean> featureWatchCache = new HashMap<>();
     private List<CSBaseSignAction> signs;
     private FileConfiguration config;
+    /**
+     * Level of logging verbosity.
+     * 1: only fatal events
+     * 2: Errors and fatalities
+     * 3: Warnings and worse.
+     * 4: Everything.
+     */
     private int verbosity;
     private Logger logger;
     private List<String> featureWatch;
 
+    public String baseDocURL = "https://coastersigns.github.io/";
+
     // <editor-fold desc="Logging Methods" defaultstate="collapsed">
+
+    /**
+     * Checks if a specific feature String (accounting for any level of detail) is
+     * watched by config.yml
+     * 
+     * @param feature A feature String of the format
+     *                feature.subfeature.functionality
+     * @return true if it is and should always be logged, false if it is not and
+     *         should only be watched if the event severity matches the verbosity
+     *         determined in config.yml
+     */
     private boolean checkFeatureWatch(String feature) {
         if (featureWatchCache.containsKey(feature))
             return featureWatchCache.get(feature);
@@ -60,6 +80,7 @@ public final class CoasterSigns extends JavaPlugin {
         if (verbosity >= 4 || checkFeatureWatch(feature))
             logger.info(feature + ": " + message);
     }
+
     // </editor-fold>
 
     public void onEnable() {
@@ -74,7 +95,7 @@ public final class CoasterSigns extends JavaPlugin {
 
         String verbosityStr = config.getString("verbosity");
         if (verbosityStr == null)
-            verbosity = 4;
+            verbosity = 3; // This should usually never be reached but just in case
         else {
             verbosityStr = verbosityStr.toLowerCase();
             verbosity = verbosityStr.equals("fatal") ? 1
@@ -96,14 +117,15 @@ public final class CoasterSigns extends JavaPlugin {
      * Reads the YAML configuration at (dir)/(name).yml and returns it as a parsed
      * YamlConfiguration
      *
-     * @param dir  The name of the subdirectory from the plugin's config directory
+     * @param dir  The name of the subdirectory from the plugin's config directory (optional)
      * @param name The name of the file, excluding the file extension
      * @return The parsed config as a YamlConfiguration, or null if it could not be
      *         found
      */
     @Nullable
-    public YamlConfiguration readFile(@Nullable String dir, String name) {
-        File file = new File(dir == null ? getDataFolder() : new File(getDataFolder(), dir), name + ".yml");
+    public YamlConfiguration readConfig(@Nullable String dir, String name) {
+        File directory = dir == null ? getDataFolder() : new File(getDataFolder(), dir);
+        File file = new File(directory, name + ".yml");
         if (!file.exists())
             return null;
         return YamlConfiguration.loadConfiguration(file);

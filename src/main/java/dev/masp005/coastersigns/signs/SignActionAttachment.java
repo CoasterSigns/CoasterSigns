@@ -28,7 +28,7 @@ public class SignActionAttachment extends CSBaseSignAction {
     static String debugName = "attchMod";
     // subfeatures: apply, inline, direction
     static String basicDesc = "modify the train or cart's attachments";
-    static String helpLink = "https://coastersigns.github.io/signs/attachment.html";
+    static String helpLink = "signs/attachment.html";
 
     public final boolean ready = true;
     private final CoasterSigns plugin;
@@ -61,7 +61,7 @@ public class SignActionAttachment extends CSBaseSignAction {
         if (type.isApply) {
             String configName = info.getLine(3);
             // Considering caching...
-            YamlConfiguration config = plugin.readFile("attachments", configName);
+            YamlConfiguration config = plugin.readConfig("attachments", configName);
             if (config == null) {
                 plugin.logWarn(String.format("AMC %s does not exist. (%s)", configName,
                         Util.blockCoordinates(info.getBlock())), debugName + ".apply");
@@ -121,7 +121,7 @@ public class SignActionAttachment extends CSBaseSignAction {
             return false;
         }
         if (new ModSignType(info.getTrackedSign()).isApply) {
-            YamlConfiguration config = plugin.readFile("attachments", info.getLine(3));
+            YamlConfiguration config = plugin.readConfig("attachments", info.getLine(3));
             if (config == null) {
                 if (info.getLine(3).endsWith(".yml"))
                     message.setDescription(
@@ -261,7 +261,7 @@ public class SignActionAttachment extends CSBaseSignAction {
     }
 
     public String helpURL() {
-        return helpLink;
+        return plugin.baseDocURL + helpLink;
     }
 
     public boolean isReady() {

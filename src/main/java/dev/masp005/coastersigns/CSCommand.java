@@ -2,6 +2,7 @@ package dev.masp005.coastersigns;
 
 import dev.masp005.coastersigns.signs.CSBaseSignAction;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -21,59 +22,37 @@ public class CSCommand implements CommandExecutor, TabCompleter {
 
     static {
         firstArg.add("signs");
-        firstArg.add("signlist");
     }
 
-    private final CoasterSigns pl;
+    private final CoasterSigns plugin;
+
+    private BaseComponent mainMessage;
+    private BaseComponent signListMessage;
 
     public CSCommand(CoasterSigns plugin) {
-        pl = plugin;
+        this.plugin = plugin;
+
         try {
-            Objects.requireNonNull(pl.getCommand("coastersigns")).setExecutor(this);
-            Objects.requireNonNull(pl.getCommand("coastersigns")).setExecutor(this);
-            pl.logInfo("CoasterSigns command registered.", "setup");
+            Objects.requireNonNull(plugin.getCommand("coastersigns")).setExecutor(this);
+            Objects.requireNonNull(plugin.getCommand("coastersigns")).setTabCompleter(this);
+            plugin.logInfo("CoasterSigns command registered.", "setup");
         } catch (NullPointerException exception) {
-            pl.logError("CoasterSigns command could not be registered.", "setup");
+            plugin.logError("CoasterSigns command could not be registered.", "setup");
+            plugin.logError(exception.getMessage(), "setup");
         }
+
+        buildMessages();
     }
 
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label,
             String[] args) {
         if (args.length == 0 || args[0].equals("about")) {
-            ComponentBuilder component = new ComponentBuilder("\nCoasterSigns\n\n").color(ChatColor.AQUA).bold(true)
-                    .underlined(true)
-                    .append("Version: " + pl.getDescription().getVersion()).reset().color(ChatColor.LIGHT_PURPLE)
-                    .event(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://semver.org"))
-                    .append("\n").reset()
-                    .append("Join the Discord").color(ChatColor.BLUE).bold(true)
-                    .event(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://discord.gg/4433WMu5bj"))
-                    .append("\n").reset();
-            sender.spigot().sendMessage(component.create());
+            sender.spigot().sendMessage(mainMessage);
             return true;
         }
         switch (args[0]) {
-            case "signlist":
             case "signs":
-                ComponentBuilder component = new ComponentBuilder("These signs are available:\n").color(ChatColor.AQUA);
-
-                boolean first = true;
-                for (CSBaseSignAction sign : pl.getSigns()) {
-                    if (first)
-                        first = false;
-                    else
-                        component.append(", ").reset().color(ChatColor.WHITE);
-                    component.append(sign.name()).color(sign.isReady() ? ChatColor.GREEN : ChatColor.RED)
-                            .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(sign.description())))
-                            .event(new ClickEvent(ClickEvent.Action.OPEN_URL, sign.helpURL()));
-                }
-
-                component.append("\n\nYou can hover and click each feature for more info. Additionally, you can ")
-                        .reset().color(ChatColor.AQUA)
-                        .append("join the discord").color(ChatColor.BLUE).underlined(true)
-                        .event(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://discord.gg/4433WMu5bj"))
-                        .append(" for further documentation.").reset().color(ChatColor.AQUA);
-
-                sender.spigot().sendMessage(component.create());
+                sender.spigot().sendMessage(signListMessage);
                 return true;
         }
         return false;
@@ -93,5 +72,44 @@ public class CSCommand implements CommandExecutor, TabCompleter {
             return entries;
         }
         return null;
+    }
+
+    private void buildMessages() {
+        mainMessage = new ComponentBuilder("\nCoasterSigns\n\n").color(ChatColor.AQUA)
+                .bold(true).underlined(true)
+                .event(new ClickEvent(ClickEvent.Action.OPEN_URL, plugin.baseDocURL))
+                .append("Version: " + plugin.getDescription().getVersion()).reset().color(ChatColor.LIGHT_PURPLE)
+                .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(
+                        new ComponentBuilder("Click to view Changelogs.").italic(true).color(ChatColor.GRAY)
+                                .create())))
+                .event(new ClickEvent(ClickEvent.Action.OPEN_URL, plugin.baseDocURL + "changelogs"))
+                .append("\n").reset()
+                .append("See available Signs").color(ChatColor.DARK_PURPLE)
+                .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/coastersigns signs"))
+                .append("\n").reset()
+                .append("Join the Discord").color(ChatColor.BLUE).bold(true)
+                .event(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://discord.gg/4433WMu5bj"))
+                .append("\n").reset().build();
+
+        ComponentBuilder signListBuilder = new ComponentBuilder("These signs are available:\n").color(ChatColor.AQUA);
+
+        boolean first = true;
+        for (CSBaseSignAction sign : plugin.getSigns()) {
+            if (first)
+                first = false;
+            else
+                signListBuilder.append(", ").reset().color(ChatColor.WHITE);
+            signListBuilder.append(sign.name()).color(sign.isReady() ? ChatColor.GREEN : ChatColor.RED)
+                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(sign.description())))
+                    .event(new ClickEvent(ClickEvent.Action.OPEN_URL, sign.helpURL()));
+        }
+
+        signListBuilder.append("\n\nYou can hover and click each feature for more info. Additionally, you can ")
+                .reset().color(ChatColor.AQUA)
+                .append("join the discord").color(ChatColor.BLUE).underlined(true)
+                .event(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://discord.gg/4433WMu5bj"))
+                .append(" for further documentation.").reset().color(ChatColor.AQUA);
+
+        signListMessage = signListBuilder.build();
     }
 }

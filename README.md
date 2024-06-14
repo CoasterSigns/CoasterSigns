@@ -13,3 +13,5 @@ easily create RollerCoasters.
    or [GitHub Releases](https://github.com/CoasterSigns/CoasterSigns/releases/latest)
 2. Start the server.
 3. All important directories and configuration files will be created automatically.
+4. See the [Documentation](https://coastersigns.github.io/) for info about the specific features.
+   You can use `/coastersigns signs` in-game for a list of signs you can use.
