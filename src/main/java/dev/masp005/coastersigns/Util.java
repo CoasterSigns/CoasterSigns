@@ -82,17 +82,18 @@ public class Util {
     public static int[] evaluateRange(Object rangeRaw, int max) throws IllegalArgumentException {
         String range;
 
-        if (rangeRaw instanceof Integer)
-            range = String.valueOf(rangeRaw);
-        else if (rangeRaw instanceof String)
-            range = (String) rangeRaw;
+        if (rangeRaw instanceof Integer) {
+            int input = Math.min(Math.max((int) rangeRaw, 0), max);
+            return new int[] { input, input };
+        } else if (rangeRaw instanceof String)
+            range = ((String) rangeRaw).trim();
         else if (rangeRaw == null)
-            range = "..";
+            return new int[] { 0, max };
         else
             throw new IllegalArgumentException("Incorrectly formatted range.");
 
         try {
-            return evaluateRange(range.trim(), max);
+            return evaluateRange(range, max);
         } catch (NumberFormatException ignored) {
             throw new IllegalArgumentException("Incorrectly formatted range.");
         }
@@ -127,8 +128,8 @@ public class Util {
         } else { // n
             rangeMin = rangeMax = Integer.parseInt(range);
         }
-        rangeMin = Math.max(0, rangeMin);
-        rangeMax = Math.min(max, rangeMax);
+        rangeMin = Math.max(0, Math.min(max, rangeMin));
+        rangeMax = Math.max(0, Math.min(max, rangeMax));
 
         return new int[] { rangeMin, rangeMax };
     }
