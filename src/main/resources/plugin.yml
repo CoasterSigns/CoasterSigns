@@ -8,6 +8,7 @@ description: placeholder
 website: placeholder
 depend: [ Train_Carts ]
 softdepend: [ TimedScripts ]
+# TODO: add more permissions
 permissions:
   coastersigns.core:
     description: Use CoasterSigns

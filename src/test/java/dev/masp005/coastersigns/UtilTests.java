@@ -1,8 +1,6 @@
 package dev.masp005.coastersigns;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.bukkit.block.BlockFace;
 import org.bukkit.util.Vector;
@@ -45,7 +43,7 @@ public class UtilTests {
             "NORTH, NORTH",
             "WEST_NORTH_WEST, WEST"
     // do not expect certain values for 45° BlockFaces. If you're using them in the
-    // first place, something's wrong.
+    // first place, you're doing something wrong.
     })
     public void nearestCartesianDirection(String direction, String expect) {
         assertEquals(BlockFace.valueOf(expect), Util.nearestCartesianDirection(BlockFace.valueOf(direction)));
@@ -58,7 +56,7 @@ public class UtilTests {
             ".1, -.5, .2, DOWN",
             "6,   -3, 17, SOUTH"
     // do not expect certain values for 45° BlockFaces. If you're using them in the
-    // first place, something's wrong.
+    // first place, you're doing something wrong.
     })
     public void nearestCartesianDirection(float x, float y, float z, String expect) {
         assertEquals(BlockFace.valueOf(expect), Util.nearestCartesianDirection(new Vector(x, y, z)));
