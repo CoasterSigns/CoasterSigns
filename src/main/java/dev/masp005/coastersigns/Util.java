@@ -174,7 +174,7 @@ public class Util {
     }
 
     /**
-     * Calculates the index of the highest absolute value.
+     * Calculates the (earliest) index of the highest absolute value.
      * Inputting an array containing 5,-7,2 would return 1, as -7 (absolute 7) is
      * the highest value present and its index is 1.
      *
@@ -182,9 +182,11 @@ public class Util {
      * @return The index of the highest absolute value.
      */
     public static int largestAbsoluteIndex(double[] values) {
-        int maxIdx = -1;
-        double maxVal = 0;
-        for (int i = 0; i < values.length; i++) {
+        if (values.length <= 1)
+            return 0;
+        int maxIdx = 0;
+        double maxVal = Math.abs(values[0]);
+        for (int i = 1; i < values.length; i++) {
             double value = Math.abs(values[i]);
             if (value <= maxVal)
                 continue;

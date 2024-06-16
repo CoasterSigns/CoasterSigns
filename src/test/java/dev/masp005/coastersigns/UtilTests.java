@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.bukkit.block.BlockFace;
-import org.bukkit.event.block.BlockCanBuildEvent;
 import org.bukkit.util.Vector;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -48,28 +47,45 @@ public class UtilTests {
     // do not expect certain values for 45° BlockFaces. If you're using them in the
     // first place, something's wrong.
     })
-    public void /* BlockFace */ nearestCartesianDirection(String direction, String expect) {
+    public void nearestCartesianDirection(String direction, String expect) {
         assertEquals(BlockFace.valueOf(expect), Util.nearestCartesianDirection(BlockFace.valueOf(direction)));
     }
 
     @ParameterizedTest(name = "{0} | {1} | {2} => {3}")
     @CsvSource({
-            "0, 1, 0, UP",
+            "0,    1,  0, UP",
+            "-1,  .5, .2, WEST",
+            ".1, -.5, .2, DOWN",
+            "6,   -3, 17, SOUTH"
     // do not expect certain values for 45° BlockFaces. If you're using them in the
     // first place, something's wrong.
     })
-    public void /* BlockFace */ nearestCartesianDirection(float x, float y, float z, String expect) {
+    public void nearestCartesianDirection(float x, float y, float z, String expect) {
         assertEquals(BlockFace.valueOf(expect), Util.nearestCartesianDirection(new Vector(x, y, z)));
     }
 
-    // @Test
-    public void /* int */ blockFaceYaw(BlockFace face) {
-
+    @ParameterizedTest(name = "{0} => {1}")
+    @CsvSource({
+            "UP,         0",
+            "SOUTH,      0",
+            "NORTH,      180",
+            "WEST,       90",
+            "NORTH_WEST, 135",
+            "NORTH_EAST, 225"
+    })
+    public void blockFaceYaw(String face, int expect) {
+        assertEquals(expect, Util.blockFaceYaw(BlockFace.valueOf(face)));
     }
 
-    // @Test
-    public void /* int */ largestAbsoluteIndex(double[] values) {
-
+    @Test
+    public void largestAbsoluteIndex() {
+        assertEquals(2, Util.largestAbsoluteIndex(new double[] { 1, 2, 3 }));
+        assertEquals(3, Util.largestAbsoluteIndex(new double[] { 1, 2, 3, -7 }));
+        assertEquals(0, Util.largestAbsoluteIndex(new double[] { -8, -1, 0, 7 }));
+        assertEquals(1, Util.largestAbsoluteIndex(new double[] { 1, 2, 1, 2 }));
+        assertEquals(0, Util.largestAbsoluteIndex(new double[] { 0, 0, 0, 0 }));
+        assertEquals(0, Util.largestAbsoluteIndex(new double[] { 8 }));
+        assertEquals(0, Util.largestAbsoluteIndex(new double[] {}));
     }
 
 }
