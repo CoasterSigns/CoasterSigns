@@ -49,6 +49,7 @@ public class SignActionTimedScript extends CSBaseSignAction {
             return;
 
         Map<String, String> replacements = new HashMap<>();
+        // TODO: account for virtual signs
         replacements.put("sender", "CoasterSigns Sign");
         replacements.put("senderworld", info.getWorld().getName());
         replacements.put("senderx", String.valueOf(info.getBlock().getX()));
@@ -59,9 +60,15 @@ public class SignActionTimedScript extends CSBaseSignAction {
         replacements.put("senderlocation", Util.blockCoordinates(info.getBlock(), " "));
 
         String line4 = info.getLine(3);
-        if (info.getLine(3).contains("=")) {
-            int equalIdx = line4.indexOf('=');
-            replacements.put(line4.substring(0, equalIdx), line4.substring(equalIdx + 1));
+        if (!line4.equals("")) {
+            if (info.getLine(3).contains("=")) {
+                int equalIdx = line4.indexOf('=');
+                replacements.put(line4.substring(0, equalIdx), line4.substring(equalIdx + 1));
+            } else
+                plugin.logWarn(
+                        String.format("Line 4 \"%s\" is not key=value (%s)", line4,
+                                Util.blockCoordinates(info.getBlock())),
+                        debugName + ".execution");
         }
 
         if (timedScriptsPlugin.getScriptManager().runScript(Bukkit.getConsoleSender(), info.getLine(2), replacements))

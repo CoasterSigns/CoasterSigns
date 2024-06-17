@@ -53,8 +53,9 @@ public class SignActionAttachment extends CSBaseSignAction {
             return;
         ModSignType type = new ModSignType(info.getTrackedSign());
 
-        plugin.logInfo(String.format("Direction: %s Facing: %s Type dir: %s", info.getCartEnterDirection().toString(),
-                info.getFacing().name(), type.direction), debugName + ".direction");
+        plugin.logInfo(String.format("Vehicle Direction: %s Target Direction: %s",
+                info.getCartEnterDirection().toString(),
+                type.direction), debugName + ".direction");
         if (!type.matchDirection(info.getCartEnterDirection()))
             return;
 
@@ -88,8 +89,19 @@ public class SignActionAttachment extends CSBaseSignAction {
                 modification.set("item", modStr.substring(2));
             if (modStr.startsWith("t="))
                 modification.set("type", modStr.substring(2));
-            if (modStr.startsWith("m="))
-                modification.set("custommodeldata", Integer.parseInt(modStr.substring(2)));
+            if (modStr.startsWith("m=")) {
+                try {
+                    modification.set("custommodeldata", Integer.parseInt(modStr.substring(2)));
+                } catch (NumberFormatException err) {
+                    plugin.logWarn(String.format("Invalid inline modification \"%s\" (%s)", modStr,
+                            Util.blockCoordinates(info.getBlock())), debugName + ".inline.parse");
+                    return;
+                }
+            } else {
+                plugin.logWarn(String.format("Invalid inline modification \"%s\" (%s)", modStr,
+                        Util.blockCoordinates(info.getBlock())), debugName + ".inline.parse");
+                return;
+            }
 
             plugin.logInfo(String.format("Inline mod result (%s):\n%s", Util.blockCoordinates(info.getBlock()),
                     modification.saveToString()), debugName + ".inline.parse");
@@ -211,8 +223,12 @@ public class SignActionAttachment extends CSBaseSignAction {
             if (childRaw instanceof Integer)
                 target = target.getChildren().get((int) childRaw);
             else if (childRaw instanceof String) {
-                for (String s : ((String) childRaw).split(":"))
-                    target = target.getChildren().get(Integer.parseInt(s));
+                try {
+                    for (String s : ((String) childRaw).split(":"))
+                        target = target.getChildren().get(Integer.parseInt(s));
+                } catch (NumberFormatException err) {
+                    throw new IllegalArgumentException("\"child\" property is incorrectly formatted");
+                }
             } else
                 throw new IllegalArgumentException("\"child\" property is incorrectly formatted");
         }
@@ -303,6 +319,7 @@ public class SignActionAttachment extends CSBaseSignAction {
                 }
             }
 
+            // TODO: ensure compatibility with virtual signs
             if (line2.length == 2) {
                 direction = line2[1].charAt(0);
                 if (direction == '<')
@@ -346,8 +363,7 @@ public class SignActionAttachment extends CSBaseSignAction {
         public boolean matchDirection(Vector movement) {
             if (direction == '*')
                 return true;
-            BlockFace movementDir = Util.nearestCartesianDirection(movement);
-            return Util.cartesianDirectionCharMap.get(direction).equals(movementDir);
+            return Util.cartesianDirectionCharMap.get(direction).equals(Util.nearestCartesianDirection(movement));
         }
     }
 }
