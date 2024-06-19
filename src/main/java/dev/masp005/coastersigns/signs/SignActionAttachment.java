@@ -61,7 +61,7 @@ public class SignActionAttachment extends CSBaseSignAction {
 
         if (type.isApply) {
             String configName = info.getLine(3);
-            // Considering caching...
+            // CONSIDER: caching...
             YamlConfiguration config = plugin.readConfig("attachments", configName);
             if (config == null) {
                 plugin.logWarn(String.format("AMC %s does not exist. (%s)", configName,
@@ -78,9 +78,9 @@ public class SignActionAttachment extends CSBaseSignAction {
                 plugin.logInfo(
                         String.format("AMC %s applied. (%s)", configName, Util.blockCoordinates(info.getBlock())),
                         debugName + ".apply");
-            } catch (Error e) {
+            } catch (Exception e) {
                 plugin.logWarn(String.format("AMC %s could not be applied. %s (%s)", configName,
-                        Util.blockCoordinates(info.getBlock()), e.toString()), debugName + ".apply");
+                        e.toString(), Util.blockCoordinates(info.getBlock())), debugName + ".apply");
             }
         } else {
             YamlConfiguration modification = type.toSingleModConfig();
@@ -104,7 +104,7 @@ public class SignActionAttachment extends CSBaseSignAction {
             }
 
             plugin.logInfo(String.format("Inline mod result (%s):\n%s", Util.blockCoordinates(info.getBlock()),
-                    modification.saveToString()), debugName + ".inline.parse");
+                    modification.saveToString().trim()), debugName + ".inline.parse");
             try {
                 if (info.isCartSign()) {
                     applyAttachmentModification(modification, info.getMember());
@@ -165,7 +165,7 @@ public class SignActionAttachment extends CSBaseSignAction {
             return;
         for (int i = 0; i < mods.size(); i++) {
             YamlConfiguration modConfig = Util.makeConfig(mods.get(i));
-            plugin.logInfo(String.format("Applying #%d: %s", i, modConfig.saveToString()),
+            plugin.logInfo(String.format("Applying #%d: %s", i, modConfig.saveToString().trim()),
                     debugName + ".apply.groupConf");
             applySingleAttachmentConfigGroup(modConfig, group);
         }
@@ -199,7 +199,7 @@ public class SignActionAttachment extends CSBaseSignAction {
             return;
         for (int i = 0; i < mods.size(); i++) {
             YamlConfiguration modConfig = Util.makeConfig(mods.get(i));
-            plugin.logInfo(String.format("Applying #%d: %s", i, modConfig.saveToString()),
+            plugin.logInfo(String.format("Applying #%d: %s", i, modConfig.saveToString().trim()),
                     debugName + ".apply.singleConf");
             applyAttachmentModification(modConfig, member);
         }
@@ -215,7 +215,7 @@ public class SignActionAttachment extends CSBaseSignAction {
     private void applyAttachmentModification(YamlConfiguration config, MinecartMember<?> member) {
         Attachment target = member.getAttachments().getRootAttachment();
 
-        plugin.logInfo(config.saveToString(), debugName + ".apply.singleMod");
+        plugin.logInfo(config.saveToString().trim(), debugName + ".apply.singleMod");
 
         if (config.isSet("child")) {
             Object childRaw = config.get("child");
