@@ -195,4 +195,13 @@ public class Util {
         }
         return maxIdx;
     }
+
+    public static String removeFileExtension(String fileName) {
+        if (!fileName.contains("."))
+            return fileName;
+        int dotIdx = fileName.indexOf(".");
+        while (fileName.indexOf(".", dotIdx + 1) > -1)
+            dotIdx = fileName.indexOf(".", dotIdx + 1);
+        return fileName.substring(0, dotIdx);
+    }
 }

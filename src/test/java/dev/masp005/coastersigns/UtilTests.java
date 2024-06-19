@@ -86,4 +86,15 @@ public class UtilTests {
         assertEquals(0, Util.largestAbsoluteIndex(new double[] {}));
     }
 
+    @ParameterizedTest(name = "{0} => {1}")
+    @CsvSource({
+            "file.yml,                         file",
+            "file.test.lol,                    file.test",
+            "file,                             file",
+            "this.is.a.very.long.filename.mp4, this.is.a.very.long.filename"
+    })
+    public void removeFileExtension(String file, String expect) {
+        assertEquals(expect, Util.removeFileExtension(file));
+    }
+
 }

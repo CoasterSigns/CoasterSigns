@@ -1,5 +1,6 @@
 package dev.masp005.coastersigns;
 
+import dev.masp005.coastersigns.rides.RideManager;
 import dev.masp005.coastersigns.signs.CSBaseSignAction;
 import dev.masp005.coastersigns.signs.SignActionAttachment;
 import dev.masp005.coastersigns.signs.SignActionTimedScript;
@@ -19,7 +20,9 @@ import java.util.logging.Logger;
 public final class CoasterSigns extends JavaPlugin {
     private final Map<String, Boolean> featureWatchCache = new HashMap<>();
     private List<CSBaseSignAction> signs;
+    private RideManager rideManager;
     private FileConfiguration config;
+
     /**
      * Level of logging verbosity.
      * 1: only fatal events
@@ -87,9 +90,9 @@ public final class CoasterSigns extends JavaPlugin {
         logger = getLogger();
 
         if (!getDataFolder().exists() && getDataFolder().mkdir())
-            logInfo("Created Config File Folder.", "startup");
+            logInfo("Created Config File Folder.", "setup");
         if (new File(getDataFolder(), "attachments").mkdir())
-            logInfo("Created Attachment Config File Folder.", "startup");
+            logInfo("Created Attachment Config File Folder.", "setup");
         saveDefaultConfig();
         config = getConfig();
 
@@ -108,6 +111,7 @@ public final class CoasterSigns extends JavaPlugin {
         signs.add(new SignActionTimedScript(this));
 
         new CSCommand(this);
+        rideManager = new RideManager(this);
     }
 
     public void onDisable() {
@@ -117,7 +121,8 @@ public final class CoasterSigns extends JavaPlugin {
      * Reads the YAML configuration at (dir)/(name).yml and returns it as a parsed
      * YamlConfiguration
      *
-     * @param dir  The name of the subdirectory from the plugin's config directory (optional)
+     * @param dir  The name of the subdirectory from the plugin's config directory
+     *             (optional)
      * @param name The name of the file, excluding the file extension
      * @return The parsed config as a YamlConfiguration, or null if it could not be
      *         found
