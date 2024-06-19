@@ -13,15 +13,25 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class CSCommand implements CommandExecutor, TabCompleter {
     private static final List<String> firstArg = new LinkedList<>();
+    private static final Map<String, List<String>> secondArg = new HashMap<>();
 
     static {
         firstArg.add("signs");
+        firstArg.add("rides");
+
+        List<String> ridesSubCMD = new LinkedList<>();
+        ridesSubCMD.add("create");
+        ridesSubCMD.add("list");
+        secondArg.put("rides", ridesSubCMD);
     }
 
     private final CoasterSigns plugin;
@@ -54,6 +64,29 @@ public class CSCommand implements CommandExecutor, TabCompleter {
             case "signs":
                 sender.spigot().sendMessage(signListMessage);
                 return true;
+            case "rides":
+                if (args.length > 1 && args[1] != "list") {
+                    switch (args[1]) {
+                        case "create":
+                            if (args.length == 2) {
+                                // TODO: Rejection message
+                                sender.spigot().sendMessage(new ComponentBuilder("how about a name").create());
+                                return false;
+                            }
+                            // TODO: combine args 3+ for name
+                            // TODO: Confirmation message
+                            plugin.rideManager.createRide(args[2]);
+                            return true;
+                    }
+                } else {
+                    // TODO: Ride list
+                    ComponentBuilder builder = new ComponentBuilder();
+                    for (String ride : plugin.rideManager.listRides()) {
+                        builder.append(ride + ", ");
+                    }
+                    sender.spigot().sendMessage(builder.create());
+                    return true;
+                }
         }
         return false;
     }
@@ -71,7 +104,16 @@ public class CSCommand implements CommandExecutor, TabCompleter {
             }
             return entries;
         }
-        return null;
+        if (args.length == 2) {
+            if (!secondArg.containsKey(args[0]))
+                return Collections.emptyList();
+            for (String arg : secondArg.get(args[0])) {
+                if (arg.startsWith(args[1]))
+                    entries.add(arg);
+            }
+            return entries;
+        }
+        return Collections.emptyList();
     }
 
     private void buildMessages() {
@@ -94,7 +136,7 @@ public class CSCommand implements CommandExecutor, TabCompleter {
         ComponentBuilder signListBuilder = new ComponentBuilder("These signs are available:\n").color(ChatColor.AQUA);
 
         boolean first = true;
-        for (CSBaseSignAction sign : plugin.getSigns()) {
+        for (CSBaseSignAction sign : plugin.signs) {
             if (first)
                 first = false;
             else

@@ -196,6 +196,12 @@ public class Util {
         return maxIdx;
     }
 
+    /**
+     * Removes the File extenstion from a file name string.
+     * 
+     * @param fileName File name.
+     * @return The provided file name without its extension.
+     */
     public static String removeFileExtension(String fileName) {
         if (!fileName.contains("."))
             return fileName;

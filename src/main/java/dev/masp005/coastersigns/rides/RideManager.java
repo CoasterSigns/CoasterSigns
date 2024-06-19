@@ -1,6 +1,7 @@
 package dev.masp005.coastersigns.rides;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,7 +12,8 @@ import dev.masp005.coastersigns.Util;
 
 public class RideManager {
     private static final String DIRECTORY_NAME = "rides";
-    private static String debugName = "attchMod";
+    private static String debugName = "rideMngr";
+    // subfeatures: read, io
     // private static String helpLink = "ridemanager.html";
     private final CoasterSigns plugin;
     private final Map<String, Ride> rides = new HashMap<>();
@@ -26,7 +28,7 @@ public class RideManager {
                 try {
                     rides.putIfAbsent(
                             Util.removeFileExtension(file),
-                            Ride.fromConfig(plugin.readConfig(DIRECTORY_NAME, file), new File(rideDir, file)));
+                            new Ride(new File(rideDir, file)));
                 } catch (Exception err) {
                     plugin.logError(String.format("Error reading Ride %s: %s", file, err.getMessage()),
                             debugName + ".read");
@@ -40,10 +42,16 @@ public class RideManager {
         return rides.get(name);
     }
 
-    public void createRide(String name) {
-        Ride ride = new Ride();
-        ride.name = name;
-        rides.put(name, ride);
+    public boolean createRide(String name) {
+        try {
+            Ride ride = new Ride(new File(new File(plugin.getDataFolder(), DIRECTORY_NAME), name + ".yml"));
+            ride.name = name;
+            rides.put(name, ride);
+            return true;
+        } catch (IOException err) {
+            plugin.logError(err.getMessage(), debugName + ".io");
+            return false;
+        }
     }
 
     public List<String> listRides() {

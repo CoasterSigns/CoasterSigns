@@ -19,8 +19,8 @@ import java.util.logging.Logger;
 
 public final class CoasterSigns extends JavaPlugin {
     private final Map<String, Boolean> featureWatchCache = new HashMap<>();
-    private List<CSBaseSignAction> signs;
-    private RideManager rideManager;
+    protected List<CSBaseSignAction> signs;
+    protected RideManager rideManager;
     private FileConfiguration config;
 
     /**
@@ -134,9 +134,5 @@ public final class CoasterSigns extends JavaPlugin {
         if (!file.exists())
             return null;
         return YamlConfiguration.loadConfiguration(file);
-    }
-
-    public List<CSBaseSignAction> getSigns() {
-        return signs;
     }
 }

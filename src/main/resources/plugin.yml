@@ -17,4 +17,4 @@ commands:
   coastersigns:
     aliases: cs
     permission: coastersigns.core
-    usage: §c/coastersigns [signs]
+    usage: §c/coastersigns [signs|rides [list|create <name>]]

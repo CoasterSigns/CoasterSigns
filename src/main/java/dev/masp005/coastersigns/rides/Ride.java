@@ -1,39 +1,63 @@
 package dev.masp005.coastersigns.rides;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 
 public class Ride {
     private static final int NEWEST_FORMAT = 1;
     protected String name;
+    private File file;
+
+    public Ride(File source) throws IOException {
+        file = source;
+        if (file.exists())
+            fromConfig();
+        else
+            save();
+    }
+
+    public void save() throws IOException {
+        YamlConfiguration config = new YamlConfiguration();
+        if (file.exists()) {
+            if (!file.delete())
+                throw new IOException();
+        }
+        file.createNewFile();
+        config.set("format", NEWEST_FORMAT);
+        config.set("name", name);
+        FileWriter writer = new FileWriter(file);
+        writer.write(config.saveToString());
+        writer.close();
+    }
 
     public String getName() {
         return name;
     }
 
-    public static Ride fromConfig(YamlConfiguration config, File source) throws IllegalArgumentException {
-        Ride ride = new Ride();
-        if (config.getInt("format") != NEWEST_FORMAT)
-            config = upgradeConfiguration(config, source);
-
-        return ride;
+    private void fromConfig() throws IllegalArgumentException {
+        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+        if (config.getInt("format") < NEWEST_FORMAT)
+            config = upgradeConfiguration(file);
     }
 
-    private static YamlConfiguration upgradeConfiguration(YamlConfiguration old, File file)
+    private static YamlConfiguration upgradeConfiguration(File file)
             throws IllegalArgumentException {
-        return upgradeConfiguration(old, file, NEWEST_FORMAT);
+        return upgradeConfiguration(file, NEWEST_FORMAT);
     }
 
-    private static YamlConfiguration upgradeConfiguration(YamlConfiguration old, File file, int target)
+    private static YamlConfiguration upgradeConfiguration(File file, int target)
             throws IllegalArgumentException {
+        YamlConfiguration old = YamlConfiguration.loadConfiguration(file);
         int oldFormat = old.getInt("format");
         if (target > NEWEST_FORMAT || target <= 0)
             throw new IllegalArgumentException("invalid target");
         if (oldFormat >= target)
             return old;
         while (oldFormat < target - 1) {
-            old = upgradeConfiguration(old, file, oldFormat + 1);
+            old = upgradeConfiguration(file, oldFormat + 1);
             oldFormat++;
         }
         // do operations, which... well.
