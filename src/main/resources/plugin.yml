@@ -3,9 +3,9 @@ version: '${project.version}'
 main: dev.masp005.coastersigns.CoasterSigns
 api-version: 1.20
 prefix: CoasterSigns
-authors: [ placeholder ]
-description: placeholder
-website: placeholder
+authors: [ MaSp005 ]
+description: Extension Plugin for TrainCarts adding functionality to easily create RollerCoasters.
+website: https://coastersigns.github.io/
 depend: [ Train_Carts ]
 softdepend: [ TimedScripts ]
 # TODO: add more permissions

@@ -44,9 +44,11 @@ public class RideManager {
 
     public boolean createRide(String name) {
         try {
-            Ride ride = new Ride(new File(new File(plugin.getDataFolder(), DIRECTORY_NAME), name + ".yml"));
+            Ride ride = new Ride(
+                    new File(new File(plugin.getDataFolder(), DIRECTORY_NAME), name.toLowerCase() + ".yml"));
             ride.name = name;
             rides.put(name, ride);
+            ride.save();
             return true;
         } catch (IOException err) {
             plugin.logError(err.getMessage(), debugName + ".io");

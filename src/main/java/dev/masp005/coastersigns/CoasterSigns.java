@@ -34,7 +34,7 @@ public final class CoasterSigns extends JavaPlugin {
     private Logger logger;
     private List<String> featureWatch;
 
-    public String baseDocURL = "https://coastersigns.github.io/";
+    public String baseDocURL;
 
     // <editor-fold desc="Logging Methods" defaultstate="collapsed">
 
@@ -95,6 +95,8 @@ public final class CoasterSigns extends JavaPlugin {
             logInfo("Created Attachment Config File Folder.", "setup");
         saveDefaultConfig();
         config = getConfig();
+
+        baseDocURL = getDescription().getWebsite();
 
         String verbosityStr = config.getString("verbosity");
         if (verbosityStr == null)

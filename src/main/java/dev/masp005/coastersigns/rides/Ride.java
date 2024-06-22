@@ -6,6 +6,9 @@ import java.io.IOException;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 
+import dev.masp005.coastersigns.Util;
+
+// CONSIDER: implement Serializable
 public class Ride {
     private static final int NEWEST_FORMAT = 1;
     protected String name;
@@ -13,18 +16,15 @@ public class Ride {
 
     public Ride(File source) throws IOException {
         file = source;
+        name = Util.removeFileExtension(source.getName());
         if (file.exists())
             fromConfig();
-        else
-            save();
     }
 
     public void save() throws IOException {
         YamlConfiguration config = new YamlConfiguration();
-        if (file.exists()) {
-            if (!file.delete())
-                throw new IOException();
-        }
+        if (file.exists() && !file.delete())
+            throw new IOException();
         file.createNewFile();
         config.set("format", NEWEST_FORMAT);
         config.set("name", name);
