@@ -68,14 +68,13 @@ public class CSCommand implements CommandExecutor, TabCompleter {
                 if (args.length > 1 && args[1] != "list") {
                     switch (args[1]) {
                         case "create":
-                            if (args.length == 2) {
-                                // TODO: Rejection message
-                                sender.spigot().sendMessage(new ComponentBuilder("how about a name").create());
+                            if (args.length == 2)
                                 return false;
-                            }
-                            // TODO: combine args 3+ for name
+                            String id = args[2].toLowerCase();
+                            String name = args.length == 3 ? id
+                                    : String.join(" ", Util.arrayToList(args).subList(2, args.length - 2));
+                            plugin.rideManager.createRide(id, name);
                             // TODO: Confirmation message
-                            plugin.rideManager.createRide(args[2]);
                             return true;
                     }
                 } else {

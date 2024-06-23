@@ -42,12 +42,12 @@ public class RideManager {
         return rides.get(name);
     }
 
-    public boolean createRide(String name) {
+    public boolean createRide(String id, String name) {
         try {
             Ride ride = new Ride(
-                    new File(new File(plugin.getDataFolder(), DIRECTORY_NAME), name.toLowerCase() + ".yml"));
+                    new File(new File(plugin.getDataFolder(), DIRECTORY_NAME), id.toLowerCase() + ".yml"));
             ride.name = name;
-            rides.put(name, ride);
+            rides.put(id, ride);
             ride.save();
             return true;
         } catch (IOException err) {

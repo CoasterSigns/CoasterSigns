@@ -4,8 +4,11 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 public class Util {
@@ -39,7 +42,7 @@ public class Util {
      * @param values A map of values.
      * @return The generated YamlConfiguration.
      */
-    public static YamlConfiguration makeConfig(Map<?, ?> values) {
+    public static YamlConfiguration makeConfig(@NotNull Map<?, ?> values) {
         YamlConfiguration config = new YamlConfiguration();
         for (Map.Entry<?, ?> entry : values.entrySet())
             config.set((String) entry.getKey(), entry.getValue());
@@ -52,7 +55,7 @@ public class Util {
      * @param block The block.
      * @return Coordinates in the format "X, Y, Z".
      */
-    public static String blockCoordinates(Block block) {
+    public static String blockCoordinates(@NotNull Block block) {
         return blockCoordinates(block, ", ");
     }
 
@@ -63,7 +66,7 @@ public class Util {
      * @param block The block.
      * @return Coordinates in the format "X(seperator)Y(seperator)Z".
      */
-    public static String blockCoordinates(Block block, String seperator) {
+    public static String blockCoordinates(@NotNull Block block, @NotNull String seperator) {
         return block.getX() + seperator +
                 block.getY() + seperator +
                 block.getZ();
@@ -79,7 +82,7 @@ public class Util {
      * @return a length 2 array of integers representing minumum and maximum
      * @throws IllegalArgumentException if the input is not formatted correctly.
      */
-    public static int[] evaluateRange(Object rangeRaw, int max) throws IllegalArgumentException {
+    public static int[] evaluateRange(Object rangeRaw, @NotNull int max) throws IllegalArgumentException {
         String range;
 
         if (rangeRaw instanceof Integer) {
@@ -108,7 +111,7 @@ public class Util {
      * @param max   The maximum possible index
      * @return a length 2 array of integers representing minumum and maximum
      */
-    public static int[] evaluateRange(String range, int max) {
+    public static int[] evaluateRange(@NotNull String range, @NotNull int max) {
         int rangeMin;
         int rangeMax;
 
@@ -141,7 +144,7 @@ public class Util {
      * @param direction The BlockFace to work off of.
      * @return The nearest cartesian direction.
      */
-    public static BlockFace nearestCartesianDirection(BlockFace direction) {
+    public static BlockFace nearestCartesianDirection(@NotNull BlockFace direction) {
         if (direction.isCartesian())
             return direction;
         return nearestCartesianDirection(direction.getDirection());
@@ -154,7 +157,7 @@ public class Util {
      * @param direction The Vector direction to work off of.
      * @return The nearest cartesian direction.
      */
-    public static BlockFace nearestCartesianDirection(Vector direction) {
+    public static BlockFace nearestCartesianDirection(@NotNull Vector direction) {
         direction = direction.normalize();
         int mostPotentSize = largestAbsoluteIndex(
                 new double[] { direction.getX(), direction.getY(), direction.getZ() });
@@ -170,6 +173,8 @@ public class Util {
     }
 
     public static int blockFaceYaw(BlockFace face) {
+        if (face == null)
+            return 0;
         return yawMap.get(face);
     }
 
@@ -181,7 +186,7 @@ public class Util {
      * @param values The value array to work with.
      * @return The index of the highest absolute value.
      */
-    public static int largestAbsoluteIndex(double[] values) {
+    public static int largestAbsoluteIndex(@NotNull double[] values) {
         if (values.length <= 1)
             return 0;
         int maxIdx = 0;
@@ -202,12 +207,27 @@ public class Util {
      * @param fileName File name.
      * @return The provided file name without its extension.
      */
-    public static String removeFileExtension(String fileName) {
+    public static String removeFileExtension(@NotNull String fileName) {
         if (!fileName.contains("."))
             return fileName;
         int dotIdx = fileName.indexOf(".");
         while (fileName.indexOf(".", dotIdx + 1) > -1)
             dotIdx = fileName.indexOf(".", dotIdx + 1);
         return fileName.substring(0, dotIdx);
+    }
+
+    /**
+     * Turns a primitive array into a List with the same content.
+     * 
+     * @param <T>   The array and List type
+     * @param array The array to be converted into a List.
+     * @return A List with the same content.
+     */
+    public static <T> List<T> arrayToList(@NotNull T[] array) {
+        List<T> list = new LinkedList<>();
+        for (T entry : array) {
+            list.add(entry);
+        }
+        return list;
     }
 }
