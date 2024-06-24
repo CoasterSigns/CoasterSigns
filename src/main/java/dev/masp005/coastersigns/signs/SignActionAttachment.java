@@ -123,6 +123,12 @@ public class SignActionAttachment extends CSBaseSignAction {
     }
 
     public boolean build(SignChangeActionEvent info) {
+        if (!info.getPlayer().hasPermission("coastersigns.signs") &&
+                !info.getPlayer().hasPermission("coastersigns.signs.attachments")) {
+            info.getPlayer().spigot().sendMessage(plugin.noPermsMessage);
+            return false;
+        }
+
         SignBuildOptions message = SignBuildOptions.create()
                 .setHelpURL(helpLink)
                 .setName(String.format("%s Attachment Modifier", info.isCartSign() ? "Cart" : "Train"))

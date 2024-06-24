@@ -82,6 +82,12 @@ public class SignActionTimedScript extends CSBaseSignAction {
     }
 
     public boolean build(SignChangeActionEvent info) {
+        if (!info.getPlayer().hasPermission("coastersigns.signs") &&
+                !info.getPlayer().hasPermission("coastersigns.signs.timedscript")) {
+            info.getPlayer().spigot().sendMessage(plugin.noPermsMessage);
+            return false;
+        }
+
         SignBuildOptions message = SignBuildOptions.create()
                 .setHelpURL(helpLink)
                 .setName("TimedScript Executor")

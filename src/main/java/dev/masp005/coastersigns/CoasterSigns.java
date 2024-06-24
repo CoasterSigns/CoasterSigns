@@ -4,6 +4,10 @@ import dev.masp005.coastersigns.rides.RideManager;
 import dev.masp005.coastersigns.signs.CSBaseSignAction;
 import dev.masp005.coastersigns.signs.SignActionAttachment;
 import dev.masp005.coastersigns.signs.SignActionTimedScript;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -35,6 +39,15 @@ public final class CoasterSigns extends JavaPlugin {
     private List<String> featureWatch;
 
     public String baseDocURL;
+    public BaseComponent noPermsMessage;
+
+    {
+        // TODO: add permission documentation and add a link here.
+        noPermsMessage = new ComponentBuilder("No Permissions. ").bold(true).color(ChatColor.GOLD)
+                .append("You do not have permission to perform this action.").reset().color(ChatColor.RED)
+                .append("\nIf you belive this is a mistake, please contact a server administrator or check your permissions.")
+                .color(ChatColor.GRAY).italic(true).build();
+    }
 
     // <editor-fold desc="Logging Methods" defaultstate="collapsed">
 

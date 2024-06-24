@@ -13,6 +13,7 @@ import dev.masp005.coastersigns.Util;
 public class RideManager {
     private static final String DIRECTORY_NAME = "rides";
     private static String debugName = "rideMngr";
+    // TODO: documentation
     // subfeatures: read, io
     // private static String helpLink = "ridemanager.html";
     private final CoasterSigns plugin;

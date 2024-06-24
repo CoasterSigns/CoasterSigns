@@ -61,11 +61,20 @@ public class CSCommand implements CommandExecutor, TabCompleter {
             sender.spigot().sendMessage(mainMessage);
             return true;
         }
+        if (!sender.hasPermission("coastersigns.core")) {
+            sender.spigot().sendMessage(plugin.noPermsMessage);
+            return false;
+
+        }
         switch (args[0]) {
             case "signs":
                 sender.spigot().sendMessage(signListMessage);
                 return true;
             case "rides":
+                if (!sender.hasPermission("coastersigns.rides")) {
+                    sender.spigot().sendMessage(plugin.noPermsMessage);
+                    return false;
+                }
                 if (args.length == 1 || args[1].equals("list")) {
                     // TODO: Ride list
                     ComponentBuilder builder = new ComponentBuilder();

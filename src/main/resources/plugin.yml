@@ -13,6 +13,15 @@ permissions:
   coastersigns.core:
     description: Use CoasterSigns
     default: op
+  coastersigns.signs:
+    description: Use custom Signs.
+    default: op
+    children:
+      coastersigns.signs.attachments: true
+      coastersigns.signs.timedscript: true
+  coastersigns.rides:
+    description: Access CoasterSigns' ride management
+    default: op
 commands:
   coastersigns:
     aliases: cs
