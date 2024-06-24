@@ -12,6 +12,7 @@ import dev.masp005.coastersigns.Util;
 public class Ride {
     private static final int NEWEST_FORMAT = 1;
     protected String name;
+
     private File file;
 
     public Ride(File source) throws IOException {
@@ -23,12 +24,11 @@ public class Ride {
 
     public void save() throws IOException {
         YamlConfiguration config = new YamlConfiguration();
-        if (file.exists() && !file.delete())
-            throw new IOException();
-        file.createNewFile();
         config.set("format", NEWEST_FORMAT);
         config.set("name", name);
-        FileWriter writer = new FileWriter(file);
+
+        file.createNewFile(); // silently fails if file already exists
+        FileWriter writer = new FileWriter(file, false);
         writer.write(config.saveToString());
         writer.close();
     }
@@ -37,10 +37,15 @@ public class Ride {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     private void fromConfig() throws IllegalArgumentException {
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
         if (config.getInt("format") < NEWEST_FORMAT)
             config = upgradeConfiguration(file);
+        name = config.getString("name");
     }
 
     private static YamlConfiguration upgradeConfiguration(File file)

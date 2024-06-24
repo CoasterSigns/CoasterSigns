@@ -13,6 +13,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -56,7 +57,7 @@ public class CSCommand implements CommandExecutor, TabCompleter {
 
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label,
             String[] args) {
-        if (args.length == 0 || args[0].equals("about")) {
+        if (args.length == 0) {
             sender.spigot().sendMessage(mainMessage);
             return true;
         }
@@ -65,19 +66,7 @@ public class CSCommand implements CommandExecutor, TabCompleter {
                 sender.spigot().sendMessage(signListMessage);
                 return true;
             case "rides":
-                if (args.length > 1 && args[1] != "list") {
-                    switch (args[1]) {
-                        case "create":
-                            if (args.length == 2)
-                                return false;
-                            String id = args[2].toLowerCase();
-                            String name = args.length == 3 ? id
-                                    : String.join(" ", Util.arrayToList(args).subList(2, args.length - 2));
-                            plugin.rideManager.createRide(id, name);
-                            // TODO: Confirmation message
-                            return true;
-                    }
-                } else {
+                if (args.length == 1 || args[1].equals("list")) {
                     // TODO: Ride list
                     ComponentBuilder builder = new ComponentBuilder();
                     for (String ride : plugin.rideManager.listRides()) {
@@ -85,6 +74,26 @@ public class CSCommand implements CommandExecutor, TabCompleter {
                     }
                     sender.spigot().sendMessage(builder.create());
                     return true;
+                }
+                switch (args[1]) {
+                    case "create":
+                        if (args.length == 2)
+                            return false;
+                        String id = args[2].toLowerCase();
+                        String name = args.length == 3 ? args[2]
+                                : String.join(" ", Util.arrayToList(args).subList(2, args.length - 2));
+                        plugin.rideManager.createRide(id, name);
+                        // TODO: Confirmation message
+                        return true;
+                    case "setname":
+                        // LEGACY: DEBUGGING ONLY
+                        plugin.rideManager.getRide(args[2]).setName(args[3]);
+                        try {
+                            plugin.rideManager.getRide(args[2]).save();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        return true;
                 }
         }
         return false;
