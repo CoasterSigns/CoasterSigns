@@ -4,6 +4,7 @@ import dev.masp005.coastersigns.rides.RideManager;
 import dev.masp005.coastersigns.signs.CSBaseSignAction;
 import dev.masp005.coastersigns.signs.SignActionAttachment;
 import dev.masp005.coastersigns.signs.SignActionTimedScript;
+import dev.masp005.coastersigns.util.InteractiveInventory;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -127,6 +128,8 @@ public final class CoasterSigns extends JavaPlugin {
 
         new CSCommand(this);
         rideManager = new RideManager(this);
+
+        InteractiveInventory.handler = new InteractiveInventory.InteractiveInventoryHandler(this);
     }
 
     public void onDisable() {

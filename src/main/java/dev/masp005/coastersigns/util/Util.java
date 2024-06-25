@@ -1,4 +1,4 @@
-package dev.masp005.coastersigns;
+package dev.masp005.coastersigns.util;
 
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -230,4 +230,5 @@ public class Util {
         }
         return list;
     }
+
 }

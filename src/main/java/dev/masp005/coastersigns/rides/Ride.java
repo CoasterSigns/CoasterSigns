@@ -6,7 +6,7 @@ import java.io.IOException;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import dev.masp005.coastersigns.Util;
+import dev.masp005.coastersigns.util.Util;
 
 // CONSIDER: implement Serializable
 public class Ride {

@@ -7,8 +7,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+
 import dev.masp005.coastersigns.CoasterSigns;
-import dev.masp005.coastersigns.Util;
+import dev.masp005.coastersigns.util.ItemBuilder;
+import dev.masp005.coastersigns.util.Util;
 
 public class RideManager {
     private static final String DIRECTORY_NAME = "rides";
@@ -63,5 +69,19 @@ public class RideManager {
             list.add(key);
         }
         return list;
+    }
+
+    public void modifyMenu(Player player, Ride ride) {
+        Inventory inventory = Bukkit.createInventory(player, 9 * 6, "a");
+        player.openInventory(inventory);
+        inventory.setItem(0, new ItemBuilder(Material.NAME_TAG).setName(ride.name).build());
+    }
+
+    public boolean modifyMenu(Player player, String ride) {
+        Ride rideObj = getRide(ride);
+        if (rideObj == null)
+            return false;
+        modifyMenu(player, rideObj);
+        return true;
     }
 }
