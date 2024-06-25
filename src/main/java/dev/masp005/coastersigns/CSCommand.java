@@ -1,7 +1,6 @@
 package dev.masp005.coastersigns;
 
 import dev.masp005.coastersigns.signs.CSBaseSignAction;
-import dev.masp005.coastersigns.util.InteractiveInventory;
 import dev.masp005.coastersigns.util.Util;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -10,12 +9,10 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.hover.content.Text;
 
-import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -109,11 +106,6 @@ public class CSCommand implements CommandExecutor, TabCompleter {
                         }
                         return true;
                 }
-            case "inventory":
-                new InteractiveInventory(1).setItem(0, Material.IRON_AXE).setUniversalListener((event) -> {
-                    event.setCancelled(true);
-                }).finish().open((Player) sender, "test");
-                return true;
         }
         return false;
     }
