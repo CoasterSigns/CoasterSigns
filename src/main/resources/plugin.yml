@@ -26,4 +26,9 @@ commands:
   coastersigns:
     aliases: cs
     permission: coastersigns.core
-    usage: §c/coastersigns [signs|rides [list|create <id> [name]]]
+    usage: |-
+      §c/coastersigns signs
+      §c/coastersigns rides
+      §c/coastersigns rides create <id>
+      §c/coastersigns rides modify <id>
+      §c/coastersigns rides changeid <from> <to>

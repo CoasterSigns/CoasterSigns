@@ -33,7 +33,7 @@ public class CSCommand implements CommandExecutor, TabCompleter {
 
         List<String> ridesSubCMD = new LinkedList<>();
         ridesSubCMD.add("create");
-        ridesSubCMD.add("list");
+        ridesSubCMD.add("changeid");
         ridesSubCMD.add("modify");
         secondArg.put("rides", ridesSubCMD);
     }
@@ -78,7 +78,7 @@ public class CSCommand implements CommandExecutor, TabCompleter {
                     sender.spigot().sendMessage(plugin.noPermsMessage);
                     return false;
                 }
-                if (args.length == 1 || args[1].equals("list")) {
+                if (args.length == 1) {
                     sender.spigot().sendMessage(plugin.rideManager.overviewMessage());
                     return true;
                 }
@@ -99,6 +99,14 @@ public class CSCommand implements CommandExecutor, TabCompleter {
                         }
                         // TODO: command only modification
                         return true;
+                    case "changeid":
+                        if (args.length == 4) {
+                            String from = args[2].toLowerCase();
+                            String to = args[3].toLowerCase();
+                            plugin.rideManager.changeId(from, to);
+                            return true;
+                        } else
+                            return false;
                 }
         }
         return false;

@@ -70,6 +70,18 @@ public class RideManager {
         return list;
     }
 
+    public boolean changeId(String from, String to) {
+        Ride ride = rides.get(from);
+        if (ride == null)
+            return false;
+        ride.file.delete();
+        ride.file = new File(new File(plugin.getDataFolder(), DIRECTORY_NAME), to.toLowerCase() + ".yml");
+        ride.save();
+        rides.put(to, ride);
+        rides.remove(from);
+        return true;
+    }
+
     public boolean modifyMenu(Player player, String ride) {
         Ride rideObj = getRide(ride);
         if (rideObj == null)

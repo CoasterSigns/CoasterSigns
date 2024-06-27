@@ -23,8 +23,7 @@ public class Ride {
     private static final int NEWEST_FORMAT = 1;
     private static final String debugName = "rideMngr";
     protected String name;
-
-    private File file;
+    protected File file;
 
     public Ride(File source) throws IOException {
         file = source;
