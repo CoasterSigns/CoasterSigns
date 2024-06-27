@@ -146,19 +146,25 @@ public class CSCommand implements CommandExecutor, TabCompleter {
     }
 
     private void buildMessages() {
-        mainMessage = new ComponentBuilder("\nCoasterSigns\n\n").color(ChatColor.AQUA)
-                .bold(true).underlined(true)
+        mainMessage = new ComponentBuilder("\nCoasterSigns").color(ChatColor.AQUA)
+                .event(Util.grayItalicHoverText("Click to view the documentation."))
                 .event(new ClickEvent(ClickEvent.Action.OPEN_URL, plugin.baseDocURL))
+                .bold(true).underlined(true)
+                .append("\n\n").reset()
+
                 .append("Version: " + plugin.getDescription().getVersion()).reset().color(ChatColor.LIGHT_PURPLE)
-                .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(
-                        new ComponentBuilder("Click to view Changelogs.").italic(true).color(ChatColor.GRAY)
-                                .create())))
+                .event(Util.grayItalicHoverText("Click to view Changelogs."))
                 .event(new ClickEvent(ClickEvent.Action.OPEN_URL, plugin.baseDocURL + "changelogs"))
                 .append("\n").reset()
+
                 .append("See available Signs").color(ChatColor.DARK_PURPLE)
+                .event(Util.grayItalicHoverText("Click to view a list of signs this server can use."))
                 .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/coastersigns signs"))
                 .append("\n").reset()
+
                 .append("Join the Discord").color(ChatColor.BLUE).bold(true)
+                .event(Util.grayItalicHoverText(
+                        "Click to join our discord to get support, suggest features or join the discussion."))
                 .event(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://discord.gg/4433WMu5bj"))
                 .append("\n").reset().build();
 

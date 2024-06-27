@@ -6,6 +6,11 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.hover.content.Text;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -219,7 +224,7 @@ public class Util {
     /**
      * Turns a primitive array into a List with the same content.
      * 
-     * @param <T>   The array and List type
+     * @param <T>   The array and List type.
      * @param array The array to be converted into a List.
      * @return A List with the same content.
      */
@@ -229,6 +234,17 @@ public class Util {
             list.add(entry);
         }
         return list;
+    }
+
+    /**
+     * Creates a HoverEvent with just gray italic text.
+     * 
+     * @param text The text to be shown in the HoverEvent.
+     * @return The generated HoverEvent.
+     */
+    public static HoverEvent grayItalicHoverText(String text) {
+        return new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(
+                new ComponentBuilder(text).italic(true).color(ChatColor.GRAY).create()));
     }
 
 }
