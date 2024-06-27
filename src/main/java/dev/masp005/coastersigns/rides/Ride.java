@@ -4,13 +4,24 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.conversations.ConversationContext;
+import org.bukkit.conversations.ConversationFactory;
+import org.bukkit.conversations.Prompt;
+import org.bukkit.conversations.StringPrompt;
+import org.bukkit.entity.Player;
 
+import dev.masp005.coastersigns.CoasterSigns;
+import dev.masp005.coastersigns.util.InteractiveInventory;
 import dev.masp005.coastersigns.util.Util;
 
 // CONSIDER: implement Serializable
 public class Ride {
+    public static CoasterSigns plugin;
     private static final int NEWEST_FORMAT = 1;
+    private static final String debugName = "rideMngr";
     protected String name;
 
     private File file;
@@ -22,15 +33,19 @@ public class Ride {
             fromConfig();
     }
 
-    public void save() throws IOException {
-        YamlConfiguration config = new YamlConfiguration();
-        config.set("format", NEWEST_FORMAT);
-        config.set("name", name);
+    public void save() {
+        try {
+            YamlConfiguration config = new YamlConfiguration();
+            config.set("format", NEWEST_FORMAT);
+            config.set("name", name);
 
-        file.createNewFile(); // silently fails if file already exists
-        FileWriter writer = new FileWriter(file, false);
-        writer.write(config.saveToString());
-        writer.close();
+            file.createNewFile(); // silently fails if file already exists
+            FileWriter writer = new FileWriter(file, false);
+            writer.write(config.saveToString());
+            writer.close();
+        } catch (IOException e) {
+            plugin.logError("Renaming failed", debugName + ".io");
+        }
     }
 
     public String getName() {
@@ -39,6 +54,31 @@ public class Ride {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void modifyMenu(Player player) {
+        new InteractiveInventory(6)
+                .setItem(0, Material.NAME_TAG).setUniversalListener(event -> {
+                    event.setCancelled(true);
+                    player.sendMessage("hi");
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        player.closeInventory();
+                        new ConversationFactory(plugin).withEscapeSequence("-").withFirstPrompt(new StringPrompt() {
+                            public String getPromptText(ConversationContext context) {
+                                return String.format("§3Enter the new name of ride §b%s§3:", getName());
+                            }
+
+                            public Prompt acceptInput(ConversationContext context, String input) {
+                                setName(input);
+                                save();
+                                player.sendMessage("§3Saved new name.");
+                                modifyMenu(player);
+                                return END_OF_CONVERSATION;
+                            }
+                        }).buildConversation(player).begin();
+                    });
+                }).finish()
+                .open(player, getName());
     }
 
     private void fromConfig() throws IllegalArgumentException {

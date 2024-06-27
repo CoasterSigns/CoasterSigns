@@ -1,5 +1,6 @@
 package dev.masp005.coastersigns;
 
+import dev.masp005.coastersigns.rides.Ride;
 import dev.masp005.coastersigns.rides.RideManager;
 import dev.masp005.coastersigns.signs.CSBaseSignAction;
 import dev.masp005.coastersigns.signs.SignActionAttachment;
@@ -127,6 +128,7 @@ public final class CoasterSigns extends JavaPlugin {
         signs.add(new SignActionTimedScript(this));
 
         new CSCommand(this);
+        Ride.plugin = this;
         rideManager = new RideManager(this);
 
         InteractiveInventory.handler = new InteractiveInventory.InteractiveInventoryHandler(this);

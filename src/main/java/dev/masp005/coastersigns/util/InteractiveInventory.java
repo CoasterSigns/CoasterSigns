@@ -13,25 +13,34 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import dev.masp005.coastersigns.CoasterSigns;
 
 public class InteractiveInventory {
     public static InteractiveInventoryHandler handler;
-    private static JavaPlugin plugin;
+    private static CoasterSigns plugin;
     private static int ROW_SIZE = 9;
     protected Inventory inventory;
     private InteractiveItem[] items;
+    private InventoryType type;
 
     public InteractiveInventory(int rows) {
         items = new InteractiveItem[rows * ROW_SIZE];
     }
 
+    private InteractiveInventory(InventoryType type) {
+        items = new InteractiveItem[type.getDefaultSize()];
+        this.type = type;
+    }
+
     public void open(Player holder, String name) {
-        inventory = Bukkit.createInventory(holder, items.length, name);
+        if (type == null)
+            inventory = Bukkit.createInventory(holder, items.length, name);
+        else
+            inventory = Bukkit.createInventory(holder, type, name);
         for (int i = 0; i < items.length; i++) {
             if (items[i] != null)
                 inventory.setItem(i, items[i].toItemStack());
@@ -145,5 +154,12 @@ public class InteractiveInventory {
             inventories.remove((Player) event.getPlayer());
             // TODO: inventory-specific close handler?
         }
+    }
+
+    public static void anvilInventory(Player holder, ItemStack item, Consumer<String> newNameCallback) {
+        new InteractiveInventory(InventoryType.ANVIL).setItemInstant(0, item).setItem(2, Material.AIR)
+                .setUniversalListener(event -> {
+                    plugin.logInfo(event.getInventory().getItem(2).getItemMeta().getDisplayName(), "asdklhj");
+                }).finish().open(holder, "test");
     }
 }

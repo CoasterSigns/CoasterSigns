@@ -13,9 +13,9 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -34,6 +34,7 @@ public class CSCommand implements CommandExecutor, TabCompleter {
         List<String> ridesSubCMD = new LinkedList<>();
         ridesSubCMD.add("create");
         ridesSubCMD.add("list");
+        ridesSubCMD.add("modify");
         secondArg.put("rides", ridesSubCMD);
     }
 
@@ -96,14 +97,12 @@ public class CSCommand implements CommandExecutor, TabCompleter {
                         plugin.rideManager.createRide(id, name);
                         // TODO: Confirmation message
                         return true;
-                    case "setname":
-                        // LEGACY: DEBUGGING ONLY
-                        plugin.rideManager.getRide(args[2]).setName(args[3]);
-                        try {
-                            plugin.rideManager.getRide(args[2]).save();
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                    case "modify":
+                        if (args.length == 3) {
+                            plugin.rideManager.modifyMenu((Player) sender, args[2]);
+                            return true;
                         }
+                        // TODO: command only modification
                         return true;
                 }
         }
@@ -131,6 +130,14 @@ public class CSCommand implements CommandExecutor, TabCompleter {
                     entries.add(arg);
             }
             return entries;
+        }
+        if (args[0] == "rides" && args[1] == "modify") {
+            if (args.length == 3) {
+                for (String ride : plugin.rideManager.listRides()) {
+                    if (ride.startsWith(args[2]))
+                        entries.add(ride);
+                }
+            }
         }
         return Collections.emptyList();
     }
