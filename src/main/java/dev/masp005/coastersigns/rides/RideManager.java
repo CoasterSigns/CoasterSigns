@@ -11,13 +11,16 @@ import org.bukkit.entity.Player;
 
 import dev.masp005.coastersigns.CoasterSigns;
 import dev.masp005.coastersigns.util.Util;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 
 public class RideManager {
     private static final String DIRECTORY_NAME = "rides";
     private static final String debugName = "rideMngr";
-    // TODO: documentation
     // subfeatures: read, io
-    // private static String helpLink = "ridemanager.html";
+    private static String helpLink = "ridemanager.html";
     private final CoasterSigns plugin;
     private final Map<String, Ride> rides = new HashMap<>();
 
@@ -73,5 +76,20 @@ public class RideManager {
             return false;
         rideObj.modifyMenu(player);
         return true;
+    }
+
+    public BaseComponent[] overviewMessage() {
+        // TODO: Ride list
+        ComponentBuilder builder = new ComponentBuilder();
+        boolean first = true;
+        for (String ride : listRides()) {
+            if (!first)
+                builder.append(", ").reset();
+            builder.append(ride).color(ChatColor.GREEN);
+            first = false;
+        }
+        builder.append("\nHelp").color(ChatColor.GOLD).bold(true)
+                .event(new ClickEvent(ClickEvent.Action.OPEN_URL, plugin.baseDocURL + helpLink));
+        return builder.create();
     }
 }

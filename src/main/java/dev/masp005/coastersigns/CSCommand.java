@@ -79,12 +79,7 @@ public class CSCommand implements CommandExecutor, TabCompleter {
                     return false;
                 }
                 if (args.length == 1 || args[1].equals("list")) {
-                    // TODO: Ride list
-                    ComponentBuilder builder = new ComponentBuilder();
-                    for (String ride : plugin.rideManager.listRides()) {
-                        builder.append(ride + ", ");
-                    }
-                    sender.spigot().sendMessage(builder.create());
+                    sender.spigot().sendMessage(plugin.rideManager.overviewMessage());
                     return true;
                 }
                 switch (args[1]) {
