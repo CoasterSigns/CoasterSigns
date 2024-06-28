@@ -31,11 +31,19 @@ public class InteractiveInventory {
         items = new InteractiveItem[rows * ROW_SIZE];
     }
 
-    private InteractiveInventory(InventoryType type) {
-        items = new InteractiveItem[type.getDefaultSize()];
-        this.type = type;
-    }
+    /*
+     * private InteractiveInventory(InventoryType type) {
+     * items = new InteractiveItem[type.getDefaultSize()];
+     * this.type = type;
+     * }
+     */
 
+    /**
+     * Opens the generated Inventory for a player.
+     * 
+     * @param holder The player it should be opened for.
+     * @param name   The title of the inventory.
+     */
     public void open(Player holder, String name) {
         if (type == null)
             inventory = Bukkit.createInventory(holder, items.length, name);
@@ -57,7 +65,7 @@ public class InteractiveInventory {
      * }
      */
 
-    public void handleClick(InventoryClickEvent event) {
+    private void handleClick(InventoryClickEvent event) {
         int slot = event.getRawSlot();
         InteractiveItem item = null;
         if (slot >= 0 && slot < items.length)
@@ -68,17 +76,57 @@ public class InteractiveInventory {
             event.setCancelled(true);
     }
 
+    /**
+     * Sets the item at a slot and starts its modification.
+     * 
+     * @param slot     The raw slot number for the item to be placed at. 0 = top
+     *                 left.
+     * @param material The material of the item.
+     * @return The generated InteractiveItem to be modified or listened to.
+     */
     public InteractiveItem setItem(int slot, Material material) {
         InteractiveItem item = new InteractiveItem(new ItemStack(material), this);
         items[slot] = item;
         return item;
     }
 
+    /**
+     * Sets the item at a slot and starts its modification.
+     * 
+     * @param slot     The raw slot number for the item to be placed at. 0 = top
+     *                 left.
+     * @param material The item to use.
+     * @return The generated InteractiveItem to be modified or listened to.
+     */
+    public InteractiveItem setItem(int slot, ItemStack material) {
+        InteractiveItem item = new InteractiveItem(material, this);
+        items[slot] = item;
+        return item;
+    }
+
+    /**
+     * Instantly sets an uninteractible item at a slot, skipping its modification.
+     * 
+     * @param slot     The raw slot number for the item to be placed at. 0 = top
+     *                 left.
+     * @param material The item to use.
+     * @return The inventory itself.
+     */
     public InteractiveInventory setItemInstant(int slot, ItemStack material) {
         items[slot] = new InteractiveItem(material, this);
         return this;
     }
 
+    /**
+     * Instantly sets an item at a slot with a specified universal interaction
+     * listener, skipping its modification.
+     * 
+     * @param slot     The raw slot number for the item to be placed at. 0 = top
+     *                 left.
+     * @param material The item to use.
+     * @param listener The event listener of the item.
+     * @return The inventory itself.
+     */
     public InteractiveInventory setItemInstant(int slot, ItemStack material, Consumer<InventoryClickEvent> listener) {
         items[slot] = new InteractiveItem(material, this);
         items[slot].setUniversalListener(listener);
@@ -97,10 +145,21 @@ public class InteractiveInventory {
             setUniversalListener(null);
         }
 
+        /**
+         * Finishes the item's configuration.
+         * 
+         * @return The inventory it is associated with.
+         */
         public InteractiveInventory finish() {
             return inventory;
         }
 
+        /**
+         * Sets this item's universal event listener.
+         * 
+         * @param listener a universal event listener.
+         * @return Itself.
+         */
         public InteractiveItem setUniversalListener(@Nullable Consumer<InventoryClickEvent> listener) {
             if (listener == null)
                 listener = event -> event.setCancelled(true);
@@ -108,7 +167,7 @@ public class InteractiveInventory {
             return this;
         }
 
-        public void handleClick(InventoryClickEvent event) {
+        private void handleClick(InventoryClickEvent event) {
             listener.accept(event);
             /*
              * // TODO: type-specific listeners (methods like onDrop or onSwap)
@@ -156,10 +215,23 @@ public class InteractiveInventory {
         }
     }
 
-    public static void anvilInventory(Player holder, ItemStack item, Consumer<String> newNameCallback) {
-        new InteractiveInventory(InventoryType.ANVIL).setItemInstant(0, item).setItem(2, Material.AIR)
-                .setUniversalListener(event -> {
-                    plugin.logInfo(event.getInventory().getItem(2).getItemMeta().getDisplayName(), "asdklhj");
-                }).finish().open(holder, "test");
-    }
+    /*
+     * Opens an anvil inventory, intended for user-friendly renaming.
+     * 
+     * @param holder The player the GUI should be opened for
+     * 
+     * @param item The item to use in the left-most slot.
+     * 
+     * @param newNameCallback Callback delivering the player-chosen new name.
+     *
+     * public static void anvilInventory(Player holder, ItemStack item,
+     * Consumer<String> newNameCallback) {
+     * new InteractiveInventory(InventoryType.ANVIL).setItemInstant(0,
+     * item).setItem(2, Material.AIR)
+     * .setUniversalListener(event -> {
+     * plugin.logInfo(event.getInventory().getItem(2).getItemMeta().getDisplayName()
+     * , "asdklhj");
+     * }).finish().open(holder, "test");
+     * }
+     */
 }

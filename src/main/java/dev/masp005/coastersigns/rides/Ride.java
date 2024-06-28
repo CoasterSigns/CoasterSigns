@@ -32,6 +32,9 @@ public class Ride {
             fromConfig();
     }
 
+    /**
+     * Saves the ride.
+     */
     public void save() {
         try {
             YamlConfiguration config = new YamlConfiguration();
@@ -47,14 +50,29 @@ public class Ride {
         }
     }
 
+    /**
+     * Gets the ride's display name.
+     * 
+     * @return The ride's display name.
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Sets the ride's display name.
+     * 
+     * @param name The ride's new display name.
+     */
     public void setName(String name) {
         this.name = name;
     }
 
+    /**
+     * Opens a modification GUI for the specified player.
+     * 
+     * @param player The player the GUI should be opened for.
+     */
     public void modifyMenu(Player player) {
         new InteractiveInventory(6)
                 .setItem(0, Material.NAME_TAG).setUniversalListener(event -> {
@@ -80,6 +98,11 @@ public class Ride {
                 .open(player, getName());
     }
 
+    /**
+     * Loads this ride from its dedicated config file.
+     * 
+     * @throws IllegalArgumentException If the config is malformed.
+     */
     private void fromConfig() throws IllegalArgumentException {
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
         if (config.getInt("format") < NEWEST_FORMAT)
@@ -87,23 +110,46 @@ public class Ride {
         name = config.getString("name");
     }
 
+    /**
+     * Upgrades a config file.
+     * 
+     * @param file The file that should be updated.
+     * @return The upgraded config file.
+     * @throws IllegalArgumentException If the config is malformed.
+     */
     private static YamlConfiguration upgradeConfiguration(File file)
             throws IllegalArgumentException {
         return upgradeConfiguration(file, NEWEST_FORMAT);
     }
 
+    /**
+     * Upgrades a config file.
+     * 
+     * @param file   The file that should be updated.
+     * @param target The target version it should be updated to.
+     * @return The upgraded config file.
+     * @throws IllegalArgumentException If the config is malformed or an invalid
+     *                                  {@code target} was supplied.
+     */
     private static YamlConfiguration upgradeConfiguration(File file, int target)
             throws IllegalArgumentException {
         YamlConfiguration old = YamlConfiguration.loadConfiguration(file);
         int oldFormat = old.getInt("format");
+
+        // invalid version
         if (target > NEWEST_FORMAT || target <= 0)
             throw new IllegalArgumentException("invalid target");
+
+        // No need to upgrade.
         if (oldFormat >= target)
             return old;
+
+        // Upgrade format to format, one at a time.
         while (oldFormat < target - 1) {
             old = upgradeConfiguration(file, oldFormat + 1);
             oldFormat++;
         }
+
         // do operations, which... well.
         return old;
     }

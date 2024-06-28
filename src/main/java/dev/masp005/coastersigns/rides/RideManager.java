@@ -44,10 +44,23 @@ public class RideManager {
         plugin.logInfo("Ride manager initialized.", "setup");
     }
 
-    public Ride getRide(String name) {
-        return rides.get(name);
+    /**
+     * Gets a ride.
+     * 
+     * @param id The ID of the ride to get.
+     * @return The ride associated with the ID or {@code null} if it does not exist.
+     */
+    public Ride getRide(String id) {
+        return rides.get(id);
     }
 
+    /**
+     * Creates a ride.
+     * 
+     * @param id   The ID this ride should be give.
+     * @param name The display name of the ride.
+     * @return Whether the creation was successful.
+     */
     public boolean createRide(String id, String name) {
         try {
             Ride ride = new Ride(
@@ -62,6 +75,11 @@ public class RideManager {
         }
     }
 
+    /**
+     * Lists ride IDs.
+     * 
+     * @return A list of all existing ride IDs.
+     */
     public List<String> listRides() {
         List<String> list = new LinkedList<>();
         for (String key : rides.keySet()) {
@@ -70,6 +88,13 @@ public class RideManager {
         return list;
     }
 
+    /**
+     * Changes the ID of a ride.
+     * 
+     * @param from The ID of the ride as it is currently stored.
+     * @param to   The ID the ride should be referred to in the future.
+     * @return Whether the change was successful.
+     */
     public boolean changeId(String from, String to) {
         Ride ride = rides.get(from);
         if (ride == null)
@@ -90,6 +115,11 @@ public class RideManager {
         return true;
     }
 
+    /**
+     * Creates the message that should be displayed for {@code /coastersigns rides}
+     * 
+     * @return The message.
+     */
     public BaseComponent[] overviewMessage() {
         // TODO: Ride list
         ComponentBuilder builder = new ComponentBuilder();
